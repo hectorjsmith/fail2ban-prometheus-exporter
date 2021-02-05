@@ -1,0 +1,22 @@
+image: golang:latest
+
+before_script:
+  - make install-deps
+
+stages:
+  - test
+
+format:
+  stage: test
+  script:
+    - make format
+
+dependencies:
+  stage: test
+  script:
+    - make go-mod-tidy
+
+test:
+  stage: test
+  script:
+    - make test
