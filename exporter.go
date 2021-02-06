@@ -18,10 +18,10 @@ var (
 		"Was the last fail2ban query successful.",
 		nil, nil,
 	)
-	metricBadIpTotal = prometheus.NewDesc(
-		prometheus.BuildFQName(namespace, "", "badip_total"),
-		"Total number of bad IPs stored in the database.",
-		nil, nil,
+	metricBadIpsPerJail = prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "bad_ips"),
+		"Number of bad IPs stored in the database (per jail).",
+		[]string{"jail"}, nil,
 	)
 )
 
@@ -30,22 +30,27 @@ type Exporter struct {
 
 func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 	ch <- metricUp
-	ch <- metricBadIpTotal
+	ch <- metricBadIpsPerJail
 }
 
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	ch <- prometheus.MustNewConstMetric(
 		metricUp, prometheus.GaugeValue, 1,
 	)
-	ch <- *collectTotalBadIpMetric()
+	collectBadIpsPerJailMetrics(ch)
 }
 
-func collectTotalBadIpMetric() *prometheus.Metric {
-	count, _ := db.CountTotalBadIps()
-	metric := prometheus.MustNewConstMetric(
-		metricBadIpTotal, prometheus.GaugeValue, float64(count),
-	)
-	return &metric
+func collectBadIpsPerJailMetrics(ch chan<- prometheus.Metric) {
+	jailNameToCountMap, err := db.CountBadIpsPerJail()
+	if err != nil {
+		log.Print(err)
+	}
+
+	for jailName, count := range jailNameToCountMap {
+		ch <- prometheus.MustNewConstMetric(
+			metricBadIpsPerJail, prometheus.GaugeValue, float64(count), jailName,
+		)
+	}
 }
 
 func main() {
