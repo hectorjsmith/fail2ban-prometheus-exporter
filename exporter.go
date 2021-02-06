@@ -1,6 +1,8 @@
 package main
 
 import (
+	fail2banDb "fail2ban-prometheus-exporter/db"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
@@ -9,23 +11,66 @@ import (
 
 const namespace = "fail2ban"
 
-var up = prometheus.NewDesc(
-	prometheus.BuildFQName(namespace, "", "up"),
-	"Was the last fail2ban query successful.",
-	nil, nil,
+var (
+	db       = fail2banDb.MustConnectToDb("fail2ban.sqlite3")
+	metricUp = prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "up"),
+		"Was the last fail2ban query successful.",
+		nil, nil,
+	)
+	metricBannedIpsPerJail = prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "banned_ips"),
+		"Number of banned IPs stored in the database (per jail).",
+		[]string{"jail"}, nil,
+	)
+	metricBadIpsPerJail = prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "bad_ips"),
+		"Number of bad IPs stored in the database (per jail).",
+		[]string{"jail"}, nil,
+	)
 )
 
 type Exporter struct {
 }
 
 func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
-	ch <- up
+	ch <- metricUp
+	ch <- metricBadIpsPerJail
+	ch <- metricBannedIpsPerJail
 }
 
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	ch <- prometheus.MustNewConstMetric(
-		up, prometheus.GaugeValue, 1,
+		metricUp, prometheus.GaugeValue, 1,
 	)
+	collectBadIpsPerJailMetrics(ch)
+	collectBannedIpsPerJailMetrics(ch)
+}
+
+func collectBadIpsPerJailMetrics(ch chan<- prometheus.Metric) {
+	jailNameToCountMap, err := db.CountBadIpsPerJail()
+	if err != nil {
+		log.Print(err)
+	}
+
+	for jailName, count := range jailNameToCountMap {
+		ch <- prometheus.MustNewConstMetric(
+			metricBadIpsPerJail, prometheus.GaugeValue, float64(count), jailName,
+		)
+	}
+}
+
+func collectBannedIpsPerJailMetrics(ch chan<- prometheus.Metric) {
+	jailNameToCountMap, err := db.CountBannedIpsPerJail()
+	if err != nil {
+		log.Print(err)
+	}
+
+	for jailName, count := range jailNameToCountMap {
+		ch <- prometheus.MustNewConstMetric(
+			metricBannedIpsPerJail, prometheus.GaugeValue, float64(count), jailName,
+		)
+	}
 }
 
 func main() {
