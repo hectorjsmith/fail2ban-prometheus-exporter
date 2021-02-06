@@ -10,7 +10,7 @@ const queryBannedIpsPerJail = "SELECT j.name, (SELECT COUNT(1) FROM bans b WHERE
 
 type Fail2BanDB struct {
 	DatabasePath string
-	sqliteDB *sql.DB
+	sqliteDB     *sql.DB
 }
 
 func MustConnectToDb(databasePath string) *Fail2BanDB {
