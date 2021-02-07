@@ -22,3 +22,9 @@ build/snapshot:
 
 build/release:
 	./tools/goreleaser_linux_amd64 --rm-dist --skip-publish
+
+build/docker:
+	docker build -t registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest .
+
+build/docker-tag:
+	docker build -t registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:$(shell git describe --tags) .

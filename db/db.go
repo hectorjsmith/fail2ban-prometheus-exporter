@@ -70,8 +70,10 @@ func (db *Fail2BanDB) RunJailNameToCountQuery(query string) (map[string]int, err
 }
 
 func (db *Fail2BanDB) mustCloseStatement(stmt *sql.Stmt) {
-	err := stmt.Close()
-	if err != nil {
-		log.Fatal(err)
+	if stmt != nil {
+		err := stmt.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
