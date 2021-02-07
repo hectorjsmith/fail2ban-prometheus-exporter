@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"log"
+	"os"
 )
 
 const queryBadIpsPerJail = "SELECT j.name, (SELECT COUNT(1) FROM bips b WHERE j.name = b.jail) FROM jails j"
@@ -14,6 +15,9 @@ type Fail2BanDB struct {
 }
 
 func MustConnectToDb(databasePath string) *Fail2BanDB {
+	if _, err := os.Stat(databasePath); os.IsNotExist(err) {
+		log.Fatalf("database path does not exist: %v", err)
+	}
 	db, err := sql.Open("sqlite3", databasePath)
 	if err != nil {
 		log.Fatal(err)
