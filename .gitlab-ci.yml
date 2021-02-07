@@ -24,6 +24,9 @@ test:
 
 build:
   stage: build
+  only:
+    - main
+    - tags
   script:
     - git fetch --tags
     - make build/snapshot
