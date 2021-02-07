@@ -5,6 +5,7 @@ before_script:
 
 stages:
   - test
+  - build
 
 format:
   stage: test
@@ -20,3 +21,17 @@ test:
   stage: test
   script:
     - make test
+
+build:
+  stage: build
+  only:
+    - main
+    - tags
+  script:
+    - git fetch --tags
+    - make build/snapshot
+  artifacts:
+    paths:
+      - dist/*.tar.gz
+      - dist/checksums.txt
+    expire_in: 1 day
