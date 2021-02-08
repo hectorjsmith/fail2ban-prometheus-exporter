@@ -38,6 +38,9 @@ build:
 
 docker-gitlab:
   stage: build
+  only:
+    - main
+    - tags
   image: docker:stable
   services:
     - docker:dind
