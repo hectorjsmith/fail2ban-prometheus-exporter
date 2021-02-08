@@ -1,18 +1,18 @@
 install-deps:
-	go mod download
+	cd src/ && go mod download
 
 # Standard go test
 test:
-	go test ./... -v -race
+	cd src/ && go test ./... -v -race
 
 # Make sure no unnecessary dependencies are present
 go-mod-tidy:
-	go mod tidy -v
+	cd src/ && go mod tidy -v
 	git diff-index --quiet HEAD
 
 format:
-	go fmt $(go list ./... | grep -v /vendor/)
-	go vet $(go list ./... | grep -v /vendor/)
+	cd src/ && go fmt $(go list ./... | grep -v /vendor/)
+	cd src/ && go vet $(go list ./... | grep -v /vendor/)
 
 generateChangelog:
 	./tools/git-chglog_linux_amd64 --config tools/chglog/config.yml 0.0.0.. > CHANGELOG.md
