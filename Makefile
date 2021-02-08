@@ -24,7 +24,11 @@ build/release:
 	./tools/goreleaser_linux_amd64 --rm-dist --skip-publish
 
 build/docker:
+	cd src/ && go build -o exporter \
+     -ldflags '-X main.version=$(shell git describe --tags) -X main.commit=${shell git rev-parse HEAD} -X "main.date=${shell date --rfc-3339=seconds}" -X main.builtBy=docker' exporter.go
+
+docker/build-latest:
 	docker build -t registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest .
 
-build/docker-tag:
+docker/build-tag:
 	docker build -t registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:$(shell git describe --tags) .
