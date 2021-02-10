@@ -71,7 +71,7 @@ The following is a simple docker-compose file to run the exporter.
 version: "2"
 services:
   exporter:
-    registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest
+    image: registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest
     volumes:
     - /var/lib/fail2ban/fail2ban.sqlite3:/app/fail2ban.sqlite3:ro
     ports:
