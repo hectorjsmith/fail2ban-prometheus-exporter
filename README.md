@@ -5,7 +5,7 @@ Go tool to collect and export metrics on Fail2Ban
 ## Table of Contents
 1. How to use
 2. Docker
-    1. Environment variables
+    1. Volumes
     2. Docker run
     3. Docker compose
 3. CLI usage
