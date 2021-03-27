@@ -12,11 +12,6 @@ format:
   script:
     - make format
 
-dependencies:
-  stage: test
-  script:
-    - make go-mod-tidy
-
 test:
   stage: test
   script:
