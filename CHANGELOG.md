@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog], and this project adheres to [Semantic Versioning].
 
-## [Unreleased]
+## [Unreleased]## [0.1.0] - 2021-03-28
 
 ### Added
 - (6355c9e) feat: fail on startup if database file does not exist ([#8](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/issues/8))
@@ -14,7 +14,10 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 - (0b40e5d) feat: connect to fail2ban db and extract total bad ips
 - (7ced846) feat: initial setup of metric exporter
 
-## 0.0.0 - 2021-02-05
+
+### Fixed
+- (0842419) fix: compile tool without cgo_enabled flag
+
 
 ---
 
@@ -23,4 +26,5 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 [git-chglog]: https://github.com/git-chglog/git-chglog
-[Unreleased]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.0.0...develop
+[Unreleased]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.1.0...main
+[0.1.0]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.0.0...0.1.0
