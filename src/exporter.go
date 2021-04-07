@@ -42,7 +42,8 @@ var (
 )
 
 type Exporter struct {
-	db *fail2banDb.Fail2BanDB
+	db        *fail2banDb.Fail2BanDB
+	lastError error
 }
 
 func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
@@ -53,16 +54,26 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
-	ch <- prometheus.MustNewConstMetric(
-		metricUp, prometheus.GaugeValue, 1,
-	)
 	e.collectBadIpsPerJailMetrics(ch)
 	e.collectBannedIpsPerJailMetrics(ch)
 	e.collectEnabledJailMetrics(ch)
+	e.collectUpMetric(ch)
+}
+
+func (e *Exporter) collectUpMetric(ch chan<- prometheus.Metric) {
+	var upMetricValue float64 = 1
+	if e.lastError != nil {
+		upMetricValue = 0
+	}
+	ch <- prometheus.MustNewConstMetric(
+		metricUp, prometheus.GaugeValue, upMetricValue,
+	)
 }
 
 func (e *Exporter) collectBadIpsPerJailMetrics(ch chan<- prometheus.Metric) {
 	jailNameToCountMap, err := e.db.CountBadIpsPerJail()
+	e.lastError = err
+
 	if err != nil {
 		log.Print(err)
 	}
@@ -76,6 +87,8 @@ func (e *Exporter) collectBadIpsPerJailMetrics(ch chan<- prometheus.Metric) {
 
 func (e *Exporter) collectBannedIpsPerJailMetrics(ch chan<- prometheus.Metric) {
 	jailNameToCountMap, err := e.db.CountBannedIpsPerJail()
+	e.lastError = err
+
 	if err != nil {
 		log.Print(err)
 	}
@@ -89,6 +102,8 @@ func (e *Exporter) collectBannedIpsPerJailMetrics(ch chan<- prometheus.Metric) {
 
 func (e *Exporter) collectEnabledJailMetrics(ch chan<- prometheus.Metric) {
 	jailNameToEnabledMap, err := e.db.JailNameToEnabledValue()
+	e.lastError = err
+
 	if err != nil {
 		log.Print(err)
 	}
