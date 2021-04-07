@@ -8,6 +8,7 @@ import (
 
 const queryBadIpsPerJail = "SELECT j.name, (SELECT COUNT(1) FROM bips b WHERE j.name = b.jail) FROM jails j"
 const queryBannedIpsPerJail = "SELECT j.name, (SELECT COUNT(1) FROM bans b WHERE j.name = b.jail) FROM jails j"
+const queryJailNameToEnabled = "SELECT j.name, j.enabled FROM jails j"
 
 type Fail2BanDB struct {
 	DatabasePath string
@@ -34,6 +35,10 @@ func (db *Fail2BanDB) CountBannedIpsPerJail() (map[string]int, error) {
 
 func (db *Fail2BanDB) CountBadIpsPerJail() (map[string]int, error) {
 	return db.RunJailNameToCountQuery(queryBadIpsPerJail)
+}
+
+func (db *Fail2BanDB) JailNameToEnabledValue() (map[string]int, error) {
+	return db.RunJailNameToCountQuery(queryJailNameToEnabled)
 }
 
 func (db *Fail2BanDB) RunJailNameToCountQuery(query string) (map[string]int, error) {
