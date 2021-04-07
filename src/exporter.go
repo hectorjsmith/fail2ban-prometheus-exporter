@@ -39,11 +39,17 @@ var (
 		"Enabled jails.",
 		[]string{"jail"}, nil,
 	)
+	metricErrorCount = prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "errors"),
+		"Number of errors found since startup.",
+		[]string{"type"}, nil,
+	)
 )
 
 type Exporter struct {
-	db        *fail2banDb.Fail2BanDB
-	lastError error
+	db           *fail2banDb.Fail2BanDB
+	lastError    error
+	dbErrorCount int
 }
 
 func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
@@ -51,6 +57,7 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 	ch <- metricBadIpsPerJail
 	ch <- metricBannedIpsPerJail
 	ch <- metricEnabledJails
+	ch <- metricErrorCount
 }
 
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
@@ -58,6 +65,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	e.collectBannedIpsPerJailMetrics(ch)
 	e.collectEnabledJailMetrics(ch)
 	e.collectUpMetric(ch)
+	e.collectErrorCountMetric(ch)
 }
 
 func (e *Exporter) collectUpMetric(ch chan<- prometheus.Metric) {
@@ -70,11 +78,18 @@ func (e *Exporter) collectUpMetric(ch chan<- prometheus.Metric) {
 	)
 }
 
+func (e *Exporter) collectErrorCountMetric(ch chan<- prometheus.Metric) {
+	ch <- prometheus.MustNewConstMetric(
+		metricErrorCount, prometheus.CounterValue, float64(e.dbErrorCount), "db",
+	)
+}
+
 func (e *Exporter) collectBadIpsPerJailMetrics(ch chan<- prometheus.Metric) {
 	jailNameToCountMap, err := e.db.CountBadIpsPerJail()
 	e.lastError = err
 
 	if err != nil {
+		e.dbErrorCount++
 		log.Print(err)
 	}
 
@@ -90,6 +105,7 @@ func (e *Exporter) collectBannedIpsPerJailMetrics(ch chan<- prometheus.Metric) {
 	e.lastError = err
 
 	if err != nil {
+		e.dbErrorCount++
 		log.Print(err)
 	}
 
@@ -105,6 +121,7 @@ func (e *Exporter) collectEnabledJailMetrics(ch chan<- prometheus.Metric) {
 	e.lastError = err
 
 	if err != nil {
+		e.dbErrorCount++
 		log.Print(err)
 	}
 
