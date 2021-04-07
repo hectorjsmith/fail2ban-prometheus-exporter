@@ -99,6 +99,7 @@ Access exported metrics at `/metrics` (on the provided port).
 
 Exposed metrics:
 * `up` - Returns 1 if the service is up
+* `errors` - Returns the number of errors found since startup
 * `enabled_jails` - Returns 1 for each jail that is enabled, 0 if disabled.
 * `bad_ips` (per jail)
     * A *bad IP* is defined as an IP that has been banned at least once in the past
@@ -125,4 +126,7 @@ fail2ban_up 1
 # TYPE fail2ban_enabled_jails gauge
 fail2ban_enabled_jails{jail="jail1"} 1
 fail2ban_enabled_jails{jail="jail2"} 1
+# HELP fail2ban_errors Number of errors found since startup.
+# TYPE fail2ban_errors counter
+fail2ban_errors{type="db"} 0
 ```
