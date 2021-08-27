@@ -7,7 +7,7 @@ import (
 )
 
 const queryBadIpsPerJail = "SELECT j.name, (SELECT COUNT(1) FROM bips b WHERE j.name = b.jail) FROM jails j"
-const queryBannedIpsPerJail = "SELECT j.name, (SELECT COUNT(1) FROM bans b WHERE j.name = b.jail) FROM jails j"
+const queryBannedIpsPerJail = "SELECT j.name, (SELECT COUNT(1) FROM bans b WHERE j.name = b.jail AND b.timeofban + b.bantime >= strftime('%s','now') + 0) FROM jails j"
 const queryJailNameToEnabled = "SELECT j.name, j.enabled FROM jails j"
 
 type Fail2BanDB struct {
