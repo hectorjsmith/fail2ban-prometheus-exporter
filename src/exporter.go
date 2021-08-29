@@ -49,10 +49,36 @@ var (
 		"Number of errors found since startup.",
 		[]string{"type"}, nil,
 	)
+
 	metricServerPing = prometheus.NewDesc(
 		prometheus.BuildFQName(sockNamespace, "", "up"),
 		"Check if the fail2ban server is up",
 		nil, nil,
+	)
+	metricJailCount = prometheus.NewDesc(
+		prometheus.BuildFQName(sockNamespace, "", "jail_count"),
+		"Number of defined jails",
+		nil, nil,
+	)
+	metricJailFailedCurrent = prometheus.NewDesc(
+		prometheus.BuildFQName(sockNamespace, "", "jail_failed_current"),
+		"Number of current failures on this jail's filter",
+		[]string{"jail"}, nil,
+	)
+	metricJailFailedTotal = prometheus.NewDesc(
+		prometheus.BuildFQName(sockNamespace, "", "jail_failed_total"),
+		"Number of total failures on this jail's filter",
+		[]string{"jail"}, nil,
+	)
+	metricJailBannedCurrent = prometheus.NewDesc(
+		prometheus.BuildFQName(sockNamespace, "", "jail_banned_current"),
+		"Number of IPs currently banned in this jail",
+		[]string{"jail"}, nil,
+	)
+	metricJailBannedTotal = prometheus.NewDesc(
+		prometheus.BuildFQName(sockNamespace, "", "jail_banned_total"),
+		"Total number of IPs banned by this jail (includes expired bans)",
+		[]string{"jail"}, nil,
 	)
 )
 
@@ -73,6 +99,11 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 	}
 	if e.socket != nil {
 		ch <- metricServerPing
+		ch <- metricJailCount
+		ch <- metricJailFailedCurrent
+		ch <- metricJailFailedTotal
+		ch <- metricJailBannedCurrent
+		ch <- metricJailBannedTotal
 	}
 }
 
@@ -86,6 +117,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	}
 	if e.socket != nil {
 		e.collectServerPingMetric(ch)
+		e.collectJailMetrics(ch)
 	}
 }
 
@@ -161,6 +193,42 @@ func (e *Exporter) collectServerPingMetric(ch chan<- prometheus.Metric) {
 	}
 	ch <- prometheus.MustNewConstMetric(
 		metricServerPing, prometheus.GaugeValue, pingSuccessInt,
+	)
+}
+
+func (e *Exporter) collectJailMetrics(ch chan<- prometheus.Metric) {
+	jails, err := e.socket.GetJails()
+	var count float64 = 0
+	if err == nil {
+		count = float64(len(jails))
+	}
+	ch <- prometheus.MustNewConstMetric(
+		metricJailCount, prometheus.GaugeValue, count,
+	)
+
+	for i := range jails {
+		e.collectJailStatsMetric(ch, jails[i])
+	}
+}
+
+func (e *Exporter) collectJailStatsMetric(ch chan<- prometheus.Metric, jail string) {
+	stats, err := e.socket.GetJailStats(jail)
+	if err != nil {
+		log.Printf("failed to get stats for jail %s: %v", jail, err)
+		return
+	}
+
+	ch <- prometheus.MustNewConstMetric(
+		metricJailFailedCurrent, prometheus.GaugeValue, float64(stats.FailedCurrent), jail,
+	)
+	ch <- prometheus.MustNewConstMetric(
+		metricJailFailedTotal, prometheus.GaugeValue, float64(stats.FailedTotal), jail,
+	)
+	ch <- prometheus.MustNewConstMetric(
+		metricJailBannedCurrent, prometheus.GaugeValue, float64(stats.BannedCurrent), jail,
+	)
+	ch <- prometheus.MustNewConstMetric(
+		metricJailBannedTotal, prometheus.GaugeValue, float64(stats.BannedTotal), jail,
 	)
 }
 

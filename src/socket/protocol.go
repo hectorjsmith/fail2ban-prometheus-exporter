@@ -10,6 +10,7 @@ import (
 const (
 	commandTerminator    = "<F2B_END_COMMAND>"
 	pingCommand          = "ping"
+	statusCommand        = "status"
 	socketReadBufferSize = 1024
 )
 
