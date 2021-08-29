@@ -1,6 +1,7 @@
 package socket
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"github.com/nlpodyssey/gopickle/pickle"
@@ -9,7 +10,7 @@ import (
 const (
 	commandTerminator    = "<F2B_END_COMMAND>"
 	pingCommand          = "ping"
-	socketReadBufferSize = 10000
+	socketReadBufferSize = 1024
 )
 
 func (s *Fail2BanSocket) sendCommand(command []string) (interface{}, error) {
@@ -33,13 +34,23 @@ func (s *Fail2BanSocket) write(command []string) error {
 }
 
 func (s *Fail2BanSocket) read() (interface{}, error) {
-	buf := make([]byte, socketReadBufferSize)
-	_, err := s.socket.Read(buf)
-	if err != nil {
-		return nil, err
+	reader := bufio.NewReader(s.socket)
+
+	data := []byte{}
+	for {
+		buf := make([]byte, socketReadBufferSize)
+		_, err := reader.Read(buf)
+		if err != nil {
+			return nil, err
+		}
+		data = append(data, buf...)
+		containsTerminator := bytes.Contains(data, []byte(commandTerminator))
+		if containsTerminator {
+			break
+		}
 	}
 
-	bufReader := bytes.NewReader(buf)
+	bufReader := bytes.NewReader(data)
 	unpickler := pickle.NewUnpickler(bufReader)
 
 	unpickler.FindClass = func(module, name string) (interface{}, error) {
