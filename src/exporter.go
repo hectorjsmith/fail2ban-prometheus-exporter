@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	namespace     = "fail2ban"
-	sockNamespace = "f2b"
+	deprecatedNamespace = "fail2ban"
+	namespace           = "f2b"
 )
 
 var (
@@ -24,64 +24,64 @@ var (
 	date    = "unknown"
 	builtBy = "unknown"
 
-	metricUp = prometheus.NewDesc(
-		prometheus.BuildFQName(namespace, "", "up"),
-		"Was the last fail2ban query successful.",
+	deprecatedMetricUp = prometheus.NewDesc(
+		prometheus.BuildFQName(deprecatedNamespace, "", "up"),
+		"(Deprecated) Was the last fail2ban query successful.",
 		nil, nil,
 	)
-	metricBannedIpsPerJail = prometheus.NewDesc(
-		prometheus.BuildFQName(namespace, "", "banned_ips"),
-		"Number of banned IPs stored in the database (per jail).",
+	deprecatedMetricBannedIpsPerJail = prometheus.NewDesc(
+		prometheus.BuildFQName(deprecatedNamespace, "", "banned_ips"),
+		"(Deprecated) Number of banned IPs stored in the database (per jail).",
 		[]string{"jail"}, nil,
 	)
-	metricBadIpsPerJail = prometheus.NewDesc(
-		prometheus.BuildFQName(namespace, "", "bad_ips"),
-		"Number of bad IPs stored in the database (per jail).",
+	deprecatedMetricBadIpsPerJail = prometheus.NewDesc(
+		prometheus.BuildFQName(deprecatedNamespace, "", "bad_ips"),
+		"(Deprecated) Number of bad IPs stored in the database (per jail).",
 		[]string{"jail"}, nil,
 	)
-	metricEnabledJails = prometheus.NewDesc(
-		prometheus.BuildFQName(namespace, "", "enabled_jails"),
-		"Enabled jails.",
+	deprecatedMetricEnabledJails = prometheus.NewDesc(
+		prometheus.BuildFQName(deprecatedNamespace, "", "enabled_jails"),
+		"(Deprecated) Enabled jails.",
 		[]string{"jail"}, nil,
 	)
-	metricErrorCount = prometheus.NewDesc(
-		prometheus.BuildFQName(namespace, "", "errors"),
-		"Number of errors found since startup.",
+	deprecatedMetricErrorCount = prometheus.NewDesc(
+		prometheus.BuildFQName(deprecatedNamespace, "", "errors"),
+		"(Deprecated) Number of errors found since startup.",
 		[]string{"type"}, nil,
 	)
 
-	metricErrorCountNew = prometheus.NewDesc(
-		prometheus.BuildFQName(sockNamespace, "", "errors"),
+	metricErrorCount = prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "errors"),
 		"Number of errors found since startup",
 		[]string{"type"}, nil,
 	)
 	metricServerUp = prometheus.NewDesc(
-		prometheus.BuildFQName(sockNamespace, "", "up"),
+		prometheus.BuildFQName(namespace, "", "up"),
 		"Check if the fail2ban server is up",
 		nil, nil,
 	)
 	metricJailCount = prometheus.NewDesc(
-		prometheus.BuildFQName(sockNamespace, "", "jail_count"),
+		prometheus.BuildFQName(namespace, "", "jail_count"),
 		"Number of defined jails",
 		nil, nil,
 	)
 	metricJailFailedCurrent = prometheus.NewDesc(
-		prometheus.BuildFQName(sockNamespace, "", "jail_failed_current"),
+		prometheus.BuildFQName(namespace, "", "jail_failed_current"),
 		"Number of current failures on this jail's filter",
 		[]string{"jail"}, nil,
 	)
 	metricJailFailedTotal = prometheus.NewDesc(
-		prometheus.BuildFQName(sockNamespace, "", "jail_failed_total"),
+		prometheus.BuildFQName(namespace, "", "jail_failed_total"),
 		"Number of total failures on this jail's filter",
 		[]string{"jail"}, nil,
 	)
 	metricJailBannedCurrent = prometheus.NewDesc(
-		prometheus.BuildFQName(sockNamespace, "", "jail_banned_current"),
+		prometheus.BuildFQName(namespace, "", "jail_banned_current"),
 		"Number of IPs currently banned in this jail",
 		[]string{"jail"}, nil,
 	)
 	metricJailBannedTotal = prometheus.NewDesc(
-		prometheus.BuildFQName(sockNamespace, "", "jail_banned_total"),
+		prometheus.BuildFQName(namespace, "", "jail_banned_total"),
 		"Total number of IPs banned by this jail (includes expired bans)",
 		[]string{"jail"}, nil,
 	)
@@ -98,11 +98,11 @@ type Exporter struct {
 
 func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 	if e.db != nil {
-		ch <- metricUp
-		ch <- metricBadIpsPerJail
-		ch <- metricBannedIpsPerJail
-		ch <- metricEnabledJails
-		ch <- metricErrorCount
+		ch <- deprecatedMetricUp
+		ch <- deprecatedMetricBadIpsPerJail
+		ch <- deprecatedMetricBannedIpsPerJail
+		ch <- deprecatedMetricEnabledJails
+		ch <- deprecatedMetricErrorCount
 	}
 	if e.socketPath != "" {
 		ch <- metricServerUp
@@ -112,16 +112,16 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 		ch <- metricJailBannedCurrent
 		ch <- metricJailBannedTotal
 	}
-	ch <- metricErrorCountNew
+	ch <- metricErrorCount
 }
 
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	if e.db != nil {
-		e.collectBadIpsPerJailMetrics(ch)
-		e.collectBannedIpsPerJailMetrics(ch)
-		e.collectEnabledJailMetrics(ch)
-		e.collectUpMetric(ch)
-		e.collectErrorCountMetric(ch)
+		e.collectDeprecatedBadIpsPerJailMetrics(ch)
+		e.collectDeprecatedBannedIpsPerJailMetrics(ch)
+		e.collectDeprecatedEnabledJailMetrics(ch)
+		e.collectDeprecatedUpMetric(ch)
+		e.collectDeprecatedErrorCountMetric(ch)
 	}
 	if e.socketPath != "" {
 		s, err := socket.ConnectToSocket(e.socketPath)
@@ -136,26 +136,26 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 			e.collectJailMetrics(ch, s)
 		}
 	}
-	e.collectErrorCountMetricNew(ch)
+	e.collectErrorCountMetric(ch)
 }
 
-func (e *Exporter) collectUpMetric(ch chan<- prometheus.Metric) {
+func (e *Exporter) collectDeprecatedUpMetric(ch chan<- prometheus.Metric) {
 	var upMetricValue float64 = 1
 	if e.lastError != nil {
 		upMetricValue = 0
 	}
 	ch <- prometheus.MustNewConstMetric(
-		metricUp, prometheus.GaugeValue, upMetricValue,
+		deprecatedMetricUp, prometheus.GaugeValue, upMetricValue,
 	)
 }
 
-func (e *Exporter) collectErrorCountMetric(ch chan<- prometheus.Metric) {
+func (e *Exporter) collectDeprecatedErrorCountMetric(ch chan<- prometheus.Metric) {
 	ch <- prometheus.MustNewConstMetric(
-		metricErrorCount, prometheus.CounterValue, float64(e.dbErrorCount), "db",
+		deprecatedMetricErrorCount, prometheus.CounterValue, float64(e.dbErrorCount), "db",
 	)
 }
 
-func (e *Exporter) collectBadIpsPerJailMetrics(ch chan<- prometheus.Metric) {
+func (e *Exporter) collectDeprecatedBadIpsPerJailMetrics(ch chan<- prometheus.Metric) {
 	jailNameToCountMap, err := e.db.CountBadIpsPerJail()
 	e.lastError = err
 
@@ -166,12 +166,12 @@ func (e *Exporter) collectBadIpsPerJailMetrics(ch chan<- prometheus.Metric) {
 
 	for jailName, count := range jailNameToCountMap {
 		ch <- prometheus.MustNewConstMetric(
-			metricBadIpsPerJail, prometheus.GaugeValue, float64(count), jailName,
+			deprecatedMetricBadIpsPerJail, prometheus.GaugeValue, float64(count), jailName,
 		)
 	}
 }
 
-func (e *Exporter) collectBannedIpsPerJailMetrics(ch chan<- prometheus.Metric) {
+func (e *Exporter) collectDeprecatedBannedIpsPerJailMetrics(ch chan<- prometheus.Metric) {
 	jailNameToCountMap, err := e.db.CountBannedIpsPerJail()
 	e.lastError = err
 
@@ -182,12 +182,12 @@ func (e *Exporter) collectBannedIpsPerJailMetrics(ch chan<- prometheus.Metric) {
 
 	for jailName, count := range jailNameToCountMap {
 		ch <- prometheus.MustNewConstMetric(
-			metricBannedIpsPerJail, prometheus.GaugeValue, float64(count), jailName,
+			deprecatedMetricBannedIpsPerJail, prometheus.GaugeValue, float64(count), jailName,
 		)
 	}
 }
 
-func (e *Exporter) collectEnabledJailMetrics(ch chan<- prometheus.Metric) {
+func (e *Exporter) collectDeprecatedEnabledJailMetrics(ch chan<- prometheus.Metric) {
 	jailNameToEnabledMap, err := e.db.JailNameToEnabledValue()
 	e.lastError = err
 
@@ -198,20 +198,20 @@ func (e *Exporter) collectEnabledJailMetrics(ch chan<- prometheus.Metric) {
 
 	for jailName, count := range jailNameToEnabledMap {
 		ch <- prometheus.MustNewConstMetric(
-			metricEnabledJails, prometheus.GaugeValue, float64(count), jailName,
+			deprecatedMetricEnabledJails, prometheus.GaugeValue, float64(count), jailName,
 		)
 	}
 }
 
-func (e *Exporter) collectErrorCountMetricNew(ch chan<- prometheus.Metric) {
+func (e *Exporter) collectErrorCountMetric(ch chan<- prometheus.Metric) {
 	ch <- prometheus.MustNewConstMetric(
-		metricErrorCountNew, prometheus.CounterValue, float64(e.dbErrorCount), "db",
+		metricErrorCount, prometheus.CounterValue, float64(e.dbErrorCount), "db",
 	)
 	ch <- prometheus.MustNewConstMetric(
-		metricErrorCountNew, prometheus.CounterValue, float64(e.socketConnectionErrorCount), "socket_conn",
+		metricErrorCount, prometheus.CounterValue, float64(e.socketConnectionErrorCount), "socket_conn",
 	)
 	ch <- prometheus.MustNewConstMetric(
-		metricErrorCountNew, prometheus.CounterValue, float64(e.socketRequestErrorCount), "socket_req",
+		metricErrorCount, prometheus.CounterValue, float64(e.socketRequestErrorCount), "socket_req",
 	)
 }
 
@@ -287,6 +287,7 @@ func main() {
 
 		exporter := &Exporter{}
 		if appSettings.Fail2BanDbPath != "" {
+			log.Print("database-based metrics have been deprecated and will be removed in a future release")
 			exporter.db = fail2banDb.MustConnectToDb(appSettings.Fail2BanDbPath)
 		}
 		if appSettings.Fail2BanSocketPath != "" {
