@@ -84,7 +84,7 @@ var (
 
 type Exporter struct {
 	db           *fail2banDb.Fail2BanDB
-	socket       *socket.Fail2BanSocket
+	socketPath   string
 	lastError    error
 	dbErrorCount int
 }
@@ -97,7 +97,7 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 		ch <- metricEnabledJails
 		ch <- metricErrorCount
 	}
-	if e.socket != nil {
+	if e.socketPath != "" {
 		ch <- metricServerPing
 		ch <- metricJailCount
 		ch <- metricJailFailedCurrent
@@ -115,9 +115,15 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 		e.collectUpMetric(ch)
 		e.collectErrorCountMetric(ch)
 	}
-	if e.socket != nil {
-		e.collectServerPingMetric(ch)
-		e.collectJailMetrics(ch)
+	if e.socketPath != "" {
+		s, err := socket.ConnectToSocket(e.socketPath)
+		if err != nil {
+			log.Printf("error opening socket: %v", err)
+		} else {
+			defer s.Close()
+			e.collectServerPingMetric(ch, s)
+			e.collectJailMetrics(ch, s)
+		}
 	}
 }
 
@@ -185,8 +191,8 @@ func (e *Exporter) collectEnabledJailMetrics(ch chan<- prometheus.Metric) {
 	}
 }
 
-func (e *Exporter) collectServerPingMetric(ch chan<- prometheus.Metric) {
-	pingSuccess := e.socket.Ping()
+func (e *Exporter) collectServerPingMetric(ch chan<- prometheus.Metric, s *socket.Fail2BanSocket) {
+	pingSuccess := s.Ping()
 	var pingSuccessInt float64 = 1
 	if !pingSuccess {
 		pingSuccessInt = 0
@@ -196,8 +202,8 @@ func (e *Exporter) collectServerPingMetric(ch chan<- prometheus.Metric) {
 	)
 }
 
-func (e *Exporter) collectJailMetrics(ch chan<- prometheus.Metric) {
-	jails, err := e.socket.GetJails()
+func (e *Exporter) collectJailMetrics(ch chan<- prometheus.Metric, s *socket.Fail2BanSocket) {
+	jails, err := s.GetJails()
 	var count float64 = 0
 	if err == nil {
 		count = float64(len(jails))
@@ -207,12 +213,12 @@ func (e *Exporter) collectJailMetrics(ch chan<- prometheus.Metric) {
 	)
 
 	for i := range jails {
-		e.collectJailStatsMetric(ch, jails[i])
+		e.collectJailStatsMetric(ch, s, jails[i])
 	}
 }
 
-func (e *Exporter) collectJailStatsMetric(ch chan<- prometheus.Metric, jail string) {
-	stats, err := e.socket.GetJailStats(jail)
+func (e *Exporter) collectJailStatsMetric(ch chan<- prometheus.Metric, s *socket.Fail2BanSocket, jail string) {
+	stats, err := s.GetJailStats(jail)
 	if err != nil {
 		log.Printf("failed to get stats for jail %s: %v", jail, err)
 		return
@@ -249,7 +255,7 @@ func main() {
 			exporter.db = fail2banDb.MustConnectToDb(appSettings.Fail2BanDbPath)
 		}
 		if appSettings.Fail2BanSocketPath != "" {
-			exporter.socket = socket.MustConnectToSocket(appSettings.Fail2BanSocketPath)
+			exporter.socketPath = appSettings.Fail2BanSocketPath
 		}
 		prometheus.MustRegister(exporter)
 

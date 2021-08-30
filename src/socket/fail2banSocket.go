@@ -21,15 +21,19 @@ type JailStats struct {
 	BannedTotal   int
 }
 
-func MustConnectToSocket(path string) *Fail2BanSocket {
+func ConnectToSocket(path string) (*Fail2BanSocket, error) {
 	c, err := net.Dial("unix", path)
 	if err != nil {
-		log.Fatalf("failed to open fail2ban socket: %v", err)
+		return nil, err
 	}
 	return &Fail2BanSocket{
 		socket:  c,
 		encoder: ogórek.NewEncoder(c),
-	}
+	}, nil
+}
+
+func (s *Fail2BanSocket) Close() error {
+	return s.socket.Close()
 }
 
 func (s *Fail2BanSocket) Ping() bool {
