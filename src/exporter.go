@@ -50,7 +50,12 @@ var (
 		[]string{"type"}, nil,
 	)
 
-	metricServerPing = prometheus.NewDesc(
+	metricErrorCountNew = prometheus.NewDesc(
+		prometheus.BuildFQName(sockNamespace, "", "errors"),
+		"Number of errors found since startup",
+		[]string{"type"}, nil,
+	)
+	metricServerUp = prometheus.NewDesc(
 		prometheus.BuildFQName(sockNamespace, "", "up"),
 		"Check if the fail2ban server is up",
 		nil, nil,
@@ -83,10 +88,12 @@ var (
 )
 
 type Exporter struct {
-	db           *fail2banDb.Fail2BanDB
-	socketPath   string
-	lastError    error
-	dbErrorCount int
+	db                         *fail2banDb.Fail2BanDB
+	socketPath                 string
+	lastError                  error
+	dbErrorCount               int
+	socketConnectionErrorCount int
+	socketRequestErrorCount    int
 }
 
 func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
@@ -98,13 +105,14 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 		ch <- metricErrorCount
 	}
 	if e.socketPath != "" {
-		ch <- metricServerPing
+		ch <- metricServerUp
 		ch <- metricJailCount
 		ch <- metricJailFailedCurrent
 		ch <- metricJailFailedTotal
 		ch <- metricJailBannedCurrent
 		ch <- metricJailBannedTotal
 	}
+	ch <- metricErrorCountNew
 }
 
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
@@ -119,12 +127,16 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 		s, err := socket.ConnectToSocket(e.socketPath)
 		if err != nil {
 			log.Printf("error opening socket: %v", err)
+			e.socketConnectionErrorCount++
 		} else {
 			defer s.Close()
-			e.collectServerPingMetric(ch, s)
+		}
+		e.collectServerUpMetric(ch, s)
+		if err == nil && s != nil {
 			e.collectJailMetrics(ch, s)
 		}
 	}
+	e.collectErrorCountMetricNew(ch)
 }
 
 func (e *Exporter) collectUpMetric(ch chan<- prometheus.Metric) {
@@ -191,20 +203,42 @@ func (e *Exporter) collectEnabledJailMetrics(ch chan<- prometheus.Metric) {
 	}
 }
 
-func (e *Exporter) collectServerPingMetric(ch chan<- prometheus.Metric, s *socket.Fail2BanSocket) {
-	pingSuccess := s.Ping()
-	var pingSuccessInt float64 = 1
-	if !pingSuccess {
-		pingSuccessInt = 0
+func (e *Exporter) collectErrorCountMetricNew(ch chan<- prometheus.Metric) {
+	ch <- prometheus.MustNewConstMetric(
+		metricErrorCountNew, prometheus.CounterValue, float64(e.dbErrorCount), "db",
+	)
+	ch <- prometheus.MustNewConstMetric(
+		metricErrorCountNew, prometheus.CounterValue, float64(e.socketConnectionErrorCount), "socket_conn",
+	)
+	ch <- prometheus.MustNewConstMetric(
+		metricErrorCountNew, prometheus.CounterValue, float64(e.socketRequestErrorCount), "socket_req",
+	)
+}
+
+func (e *Exporter) collectServerUpMetric(ch chan<- prometheus.Metric, s *socket.Fail2BanSocket) {
+	var serverUp float64 = 0
+	if s != nil {
+		pingSuccess, err := s.Ping()
+		if err != nil {
+			e.socketRequestErrorCount++
+			log.Print(err)
+		}
+		if err == nil && pingSuccess {
+			serverUp = 1
+		}
 	}
 	ch <- prometheus.MustNewConstMetric(
-		metricServerPing, prometheus.GaugeValue, pingSuccessInt,
+		metricServerUp, prometheus.GaugeValue, serverUp,
 	)
 }
 
 func (e *Exporter) collectJailMetrics(ch chan<- prometheus.Metric, s *socket.Fail2BanSocket) {
 	jails, err := s.GetJails()
 	var count float64 = 0
+	if err != nil {
+		e.socketRequestErrorCount++
+		log.Print(err)
+	}
 	if err == nil {
 		count = float64(len(jails))
 	}
@@ -220,6 +254,7 @@ func (e *Exporter) collectJailMetrics(ch chan<- prometheus.Metric, s *socket.Fai
 func (e *Exporter) collectJailStatsMetric(ch chan<- prometheus.Metric, s *socket.Fail2BanSocket, jail string) {
 	stats, err := s.GetJailStats(jail)
 	if err != nil {
+		e.socketRequestErrorCount++
 		log.Printf("failed to get stats for jail %s: %v", jail, err)
 		return
 	}

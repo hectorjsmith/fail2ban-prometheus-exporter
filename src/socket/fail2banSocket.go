@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/kisielk/og-rek"
 	"github.com/nlpodyssey/gopickle/types"
-	"log"
 	"net"
 	"strings"
 )
@@ -36,21 +35,19 @@ func (s *Fail2BanSocket) Close() error {
 	return s.socket.Close()
 }
 
-func (s *Fail2BanSocket) Ping() bool {
+func (s *Fail2BanSocket) Ping() (bool, error) {
 	response, err := s.sendCommand([]string{pingCommand, "100"})
 	if err != nil {
-		log.Printf("server ping failed: %v", err)
-		return false
+		return false, newConnectionError(pingCommand, err)
 	}
 
 	if t, ok := response.(*types.Tuple); ok {
 		if (*t)[1] == "pong" {
-			return true
+			return true, nil
 		}
-		log.Printf("unexpected response data: %s", t)
+		return false, fmt.Errorf("unexpected response data (expecting 'pong'): %s", (*t)[1])
 	}
-	log.Printf("(%s) unexpected response format - cannot parse: %v", pingCommand, response)
-	return false
+	return false, newBadFormatError(pingCommand, response)
 }
 
 func (s *Fail2BanSocket) GetJails() ([]string, error) {
@@ -123,6 +120,10 @@ func (s *Fail2BanSocket) GetJailStats(jail string) (JailStats, error) {
 
 func newBadFormatError(command string, data interface{}) error {
 	return fmt.Errorf("(%s) unexpected response format - cannot parse: %v", command, data)
+}
+
+func newConnectionError(command string, err error) error {
+	return fmt.Errorf("(%s) failed to send command through socket: %v", command, err)
 }
 
 func trimSpaceForAll(slice []string) []string {
