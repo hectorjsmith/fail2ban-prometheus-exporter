@@ -5,7 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog], and this project adheres to [Semantic Versioning].
 
 ## [Unreleased]
-*Collect metrics through fail2ban socket*
+
+## [0.2.0] - 2021-08-31
+*Collect metrics through fail2ban socket - based on [#11](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/issues/11)*
 
 ### Added
 - (39133d0) feat: collect new up metric from fail2ban socket
@@ -44,3 +46,4 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 [Unreleased]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.1.0...main
 [0.1.0]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.0.0...0.1.0
+[0.2.0]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.1.0...0.2.0
