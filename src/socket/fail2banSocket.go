@@ -118,6 +118,20 @@ func (s *Fail2BanSocket) GetJailStats(jail string) (JailStats, error) {
 	return stats, newBadFormatError(statusCommand, response)
 }
 
+func (s *Fail2BanSocket) GetServerVersion() (string, error) {
+	response, err := s.sendCommand([]string{versionCommand})
+	if err != nil {
+		return "", err
+	}
+
+	if lvl1, ok := response.(*types.Tuple); ok {
+		if versionStr, ok := lvl1.Get(1).(string); ok {
+			return versionStr, nil
+		}
+	}
+	return "", newBadFormatError(versionCommand, response)
+}
+
 func newBadFormatError(command string, data interface{}) error {
 	return fmt.Errorf("(%s) unexpected response format - cannot parse: %v", command, data)
 }

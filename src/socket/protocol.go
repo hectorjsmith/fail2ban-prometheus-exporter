@@ -11,6 +11,7 @@ const (
 	commandTerminator    = "<F2B_END_COMMAND>"
 	pingCommand          = "ping"
 	statusCommand        = "status"
+	versionCommand       = "version"
 	socketReadBufferSize = 1024
 )
 

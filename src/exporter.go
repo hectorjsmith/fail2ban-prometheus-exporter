@@ -85,6 +85,11 @@ var (
 		"Total number of IPs banned by this jail (includes expired bans)",
 		[]string{"jail"}, nil,
 	)
+	metricVersionInfo = prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "version"),
+		"Version of the exporter and fail2ban server",
+		[]string{"exporter", "fail2ban"}, nil,
+	)
 )
 
 type Exporter struct {
@@ -135,6 +140,9 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 		if err == nil && s != nil {
 			e.collectJailMetrics(ch, s)
 		}
+		e.collectVersionMetric(ch, s)
+	} else {
+		e.collectVersionMetric(ch, nil)
 	}
 	e.collectErrorCountMetric(ch)
 }
@@ -270,6 +278,22 @@ func (e *Exporter) collectJailStatsMetric(ch chan<- prometheus.Metric, s *socket
 	)
 	ch <- prometheus.MustNewConstMetric(
 		metricJailBannedTotal, prometheus.GaugeValue, float64(stats.BannedTotal), jail,
+	)
+}
+
+func (e *Exporter) collectVersionMetric(ch chan<- prometheus.Metric, s *socket.Fail2BanSocket) {
+	var err error
+	var fail2banVersion = ""
+	if s != nil {
+		fail2banVersion, err = s.GetServerVersion()
+		if err != nil {
+			e.socketRequestErrorCount++
+			log.Printf("failed to get fail2ban server version: %v", err)
+		}
+	}
+
+	ch <- prometheus.MustNewConstMetric(
+		metricVersionInfo, prometheus.GaugeValue, float64(1), version, fail2banVersion,
 	)
 }
 
