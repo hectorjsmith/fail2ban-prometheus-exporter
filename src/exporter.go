@@ -12,6 +12,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+const (
+	metricsPath = "/metrics"
+)
+
 var (
 	version = "dev"
 	commit  = "none"
@@ -29,12 +33,23 @@ func main() {
 	if appSettings.VersionMode {
 		printAppVersion()
 	} else {
-		log.Print("starting fail2ban exporter")
+		addr := fmt.Sprintf("0.0.0.0:%d", appSettings.MetricsPort)
+
+		log.Printf("starting fail2ban exporter at %s", addr)
 
 		exporter := export.NewExporter(appSettings, version)
 		prometheus.MustRegister(exporter)
 
-		http.Handle("/metrics", promhttp.Handler())
-		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", appSettings.MetricsPort), nil))
+		http.Handle(metricsPath, promhttp.Handler())
+		log.Printf("metrics available at '%s'", metricsPath)
+
+		svrErr := make(chan error)
+		go func() {
+			svrErr <- http.ListenAndServe(addr, nil)
+		}()
+		log.Print("ready")
+
+		err := <-svrErr
+		log.Print(err)
 	}
 }
