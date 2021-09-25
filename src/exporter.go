@@ -28,6 +28,21 @@ func printAppVersion() {
 	fmt.Printf("    build date:  %s\r\n    commit hash: %s\r\n    built by:    %s\r\n", date, commit, builtBy)
 }
 
+func rootHtmlHandler(w http.ResponseWriter, r *http.Request) {
+	_, err := w.Write([]byte(
+		`<html>
+			<head><title>Fail2Ban Exporter</title></head>
+			<body>
+			<h1>Fail2Ban Exporter</h1>
+			<p><a href="` + metricsPath + `">Metrics</a></p>
+			</body>
+		</html>`))
+	if err != nil {
+		log.Printf("error handling root url: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
 func main() {
 	appSettings := cfg.Parse()
 	if appSettings.VersionMode {
@@ -40,6 +55,7 @@ func main() {
 		exporter := export.NewExporter(appSettings, version)
 		prometheus.MustRegister(exporter)
 
+		http.HandleFunc("/", rootHtmlHandler)
 		http.Handle(metricsPath, promhttp.Handler())
 		log.Printf("metrics available at '%s'", metricsPath)
 
