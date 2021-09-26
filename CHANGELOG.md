@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 
 ## [Unreleased]
 
+### Added
+- (3c9a005) feat: render basic html page at root url
+- (22a165d) feat: improve startup logging
+- (fba9ee2) feat: export new version metric ([#12](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/issues/12))
+
 ## [0.2.0] - 2021-08-31
 *Collect metrics through fail2ban socket - based on [#11](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/issues/11)*
 
