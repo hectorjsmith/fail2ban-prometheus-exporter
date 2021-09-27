@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog], and this project adheres to [Semantic Versioning].
 
 ## [Unreleased]
+*Nothing yet*
+
+## [0.3.0] - 2021-09-27
+*Export new version metrics ([#12](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/issues/12))*
 
 ### Added
 - (3c9a005) feat: render basic html page at root url
@@ -44,6 +48,7 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 - (0842419) fix: compile tool without cgo_enabled flag
 
 ## 0.0.0 - 2021-02-05
+*Repository creation*
 
 ---
 
@@ -52,3 +57,4 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 [Unreleased]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.1.0...main
 [0.1.0]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.0.0...0.1.0
 [0.2.0]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.1.0...0.2.0
+[0.3.0]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.2.0...0.3.0
