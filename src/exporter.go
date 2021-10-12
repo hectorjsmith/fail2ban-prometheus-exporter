@@ -3,6 +3,7 @@ package main
 import (
 	"fail2ban-prometheus-exporter/cfg"
 	"fail2ban-prometheus-exporter/export"
+	"fail2ban-prometheus-exporter/textfile"
 	"fmt"
 	"log"
 	"net/http"
@@ -43,6 +44,11 @@ func rootHtmlHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func metricHandler(w http.ResponseWriter, r *http.Request, collector *textfile.Collector) {
+	promhttp.Handler().ServeHTTP(w, r)
+	collector.WriteTextFileMetrics(w, r)
+}
+
 func main() {
 	appSettings := cfg.Parse()
 	if appSettings.VersionMode {
@@ -55,8 +61,13 @@ func main() {
 		exporter := export.NewExporter(appSettings, version)
 		prometheus.MustRegister(exporter)
 
+		textFileCollector := textfile.NewCollector(appSettings)
+		prometheus.MustRegister(textFileCollector)
+
 		http.HandleFunc("/", rootHtmlHandler)
-		http.Handle(metricsPath, promhttp.Handler())
+		http.HandleFunc(metricsPath, func(w http.ResponseWriter, r *http.Request) {
+			metricHandler(w, r, textFileCollector)
+		})
 		log.Printf("metrics available at '%s'", metricsPath)
 
 		svrErr := make(chan error)

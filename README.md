@@ -52,6 +52,10 @@ $ fail2ban-prometheus-exporter -h
         path to the fail2ban server socket
   -version
         show version info and exit
+  -collector.textfile
+        enable the textfile collector
+  -collector.textfile.directory string
+        directory to read text files with metrics from
 ```
 
 **Example**
@@ -240,3 +244,24 @@ fail2ban_errors{type="db"} 0
 # TYPE fail2ban_up gauge
 fail2ban_up 1
 ```
+
+### 4.3. Textfile Metrics
+
+For more flexibility the exporter also allows exporting metrics collected from a text file.
+
+To enable textfile metrics:
+1. Enable the collector with `-collector.textfile=true`
+2. Provide the directory to read files from with the `-collector.textfile.directory` flag
+
+Metrics collected from these files will be exposed directly alongside the other metrics without any additional processing.
+This means that it is the responsibility of the file creator to ensure the format is correct.
+
+By exporting textfile metrics an extra metric is also exported with an error count for each file:
+
+```
+# HELP textfile_error Checks for errors while reading text files
+# TYPE textfile_error gauge
+textfile_error{path="file.prom"} 0
+```
+
+**NOTE:** Any file not ending with `.prom` will be ignored.

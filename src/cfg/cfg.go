@@ -12,10 +12,12 @@ const (
 )
 
 type AppSettings struct {
-	VersionMode        bool
-	MetricsPort        int
-	Fail2BanDbPath     string
-	Fail2BanSocketPath string
+	VersionMode          bool
+	MetricsPort          int
+	Fail2BanDbPath       string
+	Fail2BanSocketPath   string
+	FileCollectorPath    string
+	FileCollectorEnabled bool
 }
 
 func Parse() *AppSettings {
@@ -24,6 +26,8 @@ func Parse() *AppSettings {
 	flag.IntVar(&appSettings.MetricsPort, "port", 9191, "port to use for the metrics server")
 	flag.StringVar(&appSettings.Fail2BanDbPath, "db", "", "path to the fail2ban sqlite database (deprecated)")
 	flag.StringVar(&appSettings.Fail2BanSocketPath, "socket", "", "path to the fail2ban server socket")
+	flag.BoolVar(&appSettings.FileCollectorEnabled, "collector.textfile", false, "enable the textfile collector")
+	flag.StringVar(&appSettings.FileCollectorPath, "collector.textfile.directory", "", "directory to read text files with metrics from")
 
 	flag.Parse()
 	appSettings.validateFlags()
@@ -40,6 +44,10 @@ func (settings *AppSettings) validateFlags() {
 		if settings.MetricsPort < minServerPort || settings.MetricsPort > maxServerPort {
 			fmt.Printf("invalid server port, must be within %d and %d (found %d)\n",
 				minServerPort, maxServerPort, settings.MetricsPort)
+			flagsValid = false
+		}
+		if settings.FileCollectorEnabled && settings.FileCollectorPath == "" {
+			fmt.Printf("file collector directory path must not be empty if collector enabled\n")
 			flagsValid = false
 		}
 	}
