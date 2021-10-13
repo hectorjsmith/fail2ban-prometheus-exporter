@@ -2,8 +2,8 @@ package main
 
 import (
 	"fail2ban-prometheus-exporter/cfg"
-	"fail2ban-prometheus-exporter/export"
-	"fail2ban-prometheus-exporter/textfile"
+	"fail2ban-prometheus-exporter/collector/f2b"
+	textfile2 "fail2ban-prometheus-exporter/collector/textfile"
 	"fmt"
 	"log"
 	"net/http"
@@ -44,7 +44,7 @@ func rootHtmlHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func metricHandler(w http.ResponseWriter, r *http.Request, collector *textfile.Collector) {
+func metricHandler(w http.ResponseWriter, r *http.Request, collector *textfile2.Collector) {
 	promhttp.Handler().ServeHTTP(w, r)
 	collector.WriteTextFileMetrics(w, r)
 }
@@ -58,10 +58,10 @@ func main() {
 
 		log.Printf("starting fail2ban exporter at %s", addr)
 
-		exporter := export.NewExporter(appSettings, version)
-		prometheus.MustRegister(exporter)
+		f2bCollector := f2b.NewExporter(appSettings, version)
+		prometheus.MustRegister(f2bCollector)
 
-		textFileCollector := textfile.NewCollector(appSettings)
+		textFileCollector := textfile2.NewCollector(appSettings)
 		prometheus.MustRegister(textFileCollector)
 
 		http.HandleFunc("/", rootHtmlHandler)
