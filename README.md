@@ -157,6 +157,7 @@ Exposed metrics:
 * `jail_banned_total` (per jail) - Total number of banned IPs since fail2ban startup (includes expired bans)
 * `jail_failed_current` (per jail) - Number of current failures
 * `jail_failed_total` (per jail) - Total number of failures since fail2ban startup
+* `version` - Version string of the exporter and fail2ban
 
 **Sample**
 
@@ -188,6 +189,9 @@ f2b_jail_failed_total{jail="sshd"} 125
 # HELP f2b_up Check if the fail2ban server is up
 # TYPE f2b_up gauge
 f2b_up 1
+# HELP f2b_version Version of the exporter and fail2ban server
+# TYPE f2b_version gauge
+f2b_version{exporter="0.3.0",fail2ban="0.11.1"} 1
 ```
 
 The metrics above correspond to the matching fields in the `fail2ban-client status <jail>` command:
