@@ -1,4 +1,4 @@
-package export
+package f2b
 
 import (
 	"fail2ban-prometheus-exporter/socket"
@@ -53,24 +53,24 @@ var (
 	)
 )
 
-func (e *Exporter) collectErrorCountMetric(ch chan<- prometheus.Metric) {
+func (c *Collector) collectErrorCountMetric(ch chan<- prometheus.Metric) {
 	ch <- prometheus.MustNewConstMetric(
-		metricErrorCount, prometheus.CounterValue, float64(e.dbErrorCount), "db",
+		metricErrorCount, prometheus.CounterValue, float64(c.dbErrorCount), "db",
 	)
 	ch <- prometheus.MustNewConstMetric(
-		metricErrorCount, prometheus.CounterValue, float64(e.socketConnectionErrorCount), "socket_conn",
+		metricErrorCount, prometheus.CounterValue, float64(c.socketConnectionErrorCount), "socket_conn",
 	)
 	ch <- prometheus.MustNewConstMetric(
-		metricErrorCount, prometheus.CounterValue, float64(e.socketRequestErrorCount), "socket_req",
+		metricErrorCount, prometheus.CounterValue, float64(c.socketRequestErrorCount), "socket_req",
 	)
 }
 
-func (e *Exporter) collectServerUpMetric(ch chan<- prometheus.Metric, s *socket.Fail2BanSocket) {
+func (c *Collector) collectServerUpMetric(ch chan<- prometheus.Metric, s *socket.Fail2BanSocket) {
 	var serverUp float64 = 0
 	if s != nil {
 		pingSuccess, err := s.Ping()
 		if err != nil {
-			e.socketRequestErrorCount++
+			c.socketRequestErrorCount++
 			log.Print(err)
 		}
 		if err == nil && pingSuccess {
@@ -82,11 +82,11 @@ func (e *Exporter) collectServerUpMetric(ch chan<- prometheus.Metric, s *socket.
 	)
 }
 
-func (e *Exporter) collectJailMetrics(ch chan<- prometheus.Metric, s *socket.Fail2BanSocket) {
+func (c *Collector) collectJailMetrics(ch chan<- prometheus.Metric, s *socket.Fail2BanSocket) {
 	jails, err := s.GetJails()
 	var count float64 = 0
 	if err != nil {
-		e.socketRequestErrorCount++
+		c.socketRequestErrorCount++
 		log.Print(err)
 	}
 	if err == nil {
@@ -97,14 +97,14 @@ func (e *Exporter) collectJailMetrics(ch chan<- prometheus.Metric, s *socket.Fai
 	)
 
 	for i := range jails {
-		e.collectJailStatsMetric(ch, s, jails[i])
+		c.collectJailStatsMetric(ch, s, jails[i])
 	}
 }
 
-func (e *Exporter) collectJailStatsMetric(ch chan<- prometheus.Metric, s *socket.Fail2BanSocket, jail string) {
+func (c *Collector) collectJailStatsMetric(ch chan<- prometheus.Metric, s *socket.Fail2BanSocket, jail string) {
 	stats, err := s.GetJailStats(jail)
 	if err != nil {
-		e.socketRequestErrorCount++
+		c.socketRequestErrorCount++
 		log.Printf("failed to get stats for jail %s: %v", jail, err)
 		return
 	}
@@ -123,18 +123,18 @@ func (e *Exporter) collectJailStatsMetric(ch chan<- prometheus.Metric, s *socket
 	)
 }
 
-func (e *Exporter) collectVersionMetric(ch chan<- prometheus.Metric, s *socket.Fail2BanSocket) {
+func (c *Collector) collectVersionMetric(ch chan<- prometheus.Metric, s *socket.Fail2BanSocket) {
 	var err error
 	var fail2banVersion = ""
 	if s != nil {
 		fail2banVersion, err = s.GetServerVersion()
 		if err != nil {
-			e.socketRequestErrorCount++
+			c.socketRequestErrorCount++
 			log.Printf("failed to get fail2ban server version: %v", err)
 		}
 	}
 
 	ch <- prometheus.MustNewConstMetric(
-		metricVersionInfo, prometheus.GaugeValue, float64(1), e.exporterVersion, fail2banVersion,
+		metricVersionInfo, prometheus.GaugeValue, float64(1), c.exporterVersion, fail2banVersion,
 	)
 }

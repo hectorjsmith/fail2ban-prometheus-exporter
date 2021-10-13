@@ -1,4 +1,4 @@
-package export
+package f2b
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
@@ -37,9 +37,9 @@ var (
 	)
 )
 
-func (e *Exporter) collectDeprecatedUpMetric(ch chan<- prometheus.Metric) {
+func (c *Collector) collectDeprecatedUpMetric(ch chan<- prometheus.Metric) {
 	var upMetricValue float64 = 1
-	if e.lastError != nil {
+	if c.lastError != nil {
 		upMetricValue = 0
 	}
 	ch <- prometheus.MustNewConstMetric(
@@ -47,18 +47,18 @@ func (e *Exporter) collectDeprecatedUpMetric(ch chan<- prometheus.Metric) {
 	)
 }
 
-func (e *Exporter) collectDeprecatedErrorCountMetric(ch chan<- prometheus.Metric) {
+func (c *Collector) collectDeprecatedErrorCountMetric(ch chan<- prometheus.Metric) {
 	ch <- prometheus.MustNewConstMetric(
-		deprecatedMetricErrorCount, prometheus.CounterValue, float64(e.dbErrorCount), "db",
+		deprecatedMetricErrorCount, prometheus.CounterValue, float64(c.dbErrorCount), "db",
 	)
 }
 
-func (e *Exporter) collectDeprecatedBadIpsPerJailMetrics(ch chan<- prometheus.Metric) {
-	jailNameToCountMap, err := e.db.CountBadIpsPerJail()
-	e.lastError = err
+func (c *Collector) collectDeprecatedBadIpsPerJailMetrics(ch chan<- prometheus.Metric) {
+	jailNameToCountMap, err := c.db.CountBadIpsPerJail()
+	c.lastError = err
 
 	if err != nil {
-		e.dbErrorCount++
+		c.dbErrorCount++
 		log.Print(err)
 	}
 
@@ -69,12 +69,12 @@ func (e *Exporter) collectDeprecatedBadIpsPerJailMetrics(ch chan<- prometheus.Me
 	}
 }
 
-func (e *Exporter) collectDeprecatedBannedIpsPerJailMetrics(ch chan<- prometheus.Metric) {
-	jailNameToCountMap, err := e.db.CountBannedIpsPerJail()
-	e.lastError = err
+func (c *Collector) collectDeprecatedBannedIpsPerJailMetrics(ch chan<- prometheus.Metric) {
+	jailNameToCountMap, err := c.db.CountBannedIpsPerJail()
+	c.lastError = err
 
 	if err != nil {
-		e.dbErrorCount++
+		c.dbErrorCount++
 		log.Print(err)
 	}
 
@@ -85,12 +85,12 @@ func (e *Exporter) collectDeprecatedBannedIpsPerJailMetrics(ch chan<- prometheus
 	}
 }
 
-func (e *Exporter) collectDeprecatedEnabledJailMetrics(ch chan<- prometheus.Metric) {
-	jailNameToEnabledMap, err := e.db.JailNameToEnabledValue()
-	e.lastError = err
+func (c *Collector) collectDeprecatedEnabledJailMetrics(ch chan<- prometheus.Metric) {
+	jailNameToEnabledMap, err := c.db.JailNameToEnabledValue()
+	c.lastError = err
 
 	if err != nil {
-		e.dbErrorCount++
+		c.dbErrorCount++
 		log.Print(err)
 	}
 
