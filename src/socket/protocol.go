@@ -12,6 +12,9 @@ const (
 	pingCommand          = "ping"
 	statusCommand        = "status"
 	versionCommand       = "version"
+	banTimeCommandFmt    = "get %s bantime"
+	findTimeCommandFmt   = "get %s findtime"
+	maxRetriesCommandFmt = "get %s maxretry"
 	socketReadBufferSize = 1024
 )
 
