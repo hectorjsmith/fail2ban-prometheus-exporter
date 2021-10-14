@@ -46,6 +46,21 @@ var (
 		"Total number of IPs banned by this jail (includes expired bans)",
 		[]string{"jail"}, nil,
 	)
+	metricJailBanTime = prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "config", "jail_ban_time"),
+		"How long an IP is banned for in this jail (in seconds)",
+		[]string{"jail"}, nil,
+	)
+	metricJailFindTime = prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "config", "jail_find_time"),
+		"How far back will the filter look for failures in this jail (in seconds)",
+		[]string{"jail"}, nil,
+	)
+	metricJailMaxRetry = prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "config", "jail_max_retries"),
+		"The number of failures allowed until the IP is banned by this jail",
+		[]string{"jail"}, nil,
+	)
 	metricVersionInfo = prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "version"),
 		"Version of the exporter and fail2ban server",
@@ -98,6 +113,7 @@ func (c *Collector) collectJailMetrics(ch chan<- prometheus.Metric, s *socket.Fa
 
 	for i := range jails {
 		c.collectJailStatsMetric(ch, s, jails[i])
+		c.collectJailConfigMetrics(ch, s, jails[i])
 	}
 }
 
@@ -121,6 +137,36 @@ func (c *Collector) collectJailStatsMetric(ch chan<- prometheus.Metric, s *socke
 	ch <- prometheus.MustNewConstMetric(
 		metricJailBannedTotal, prometheus.GaugeValue, float64(stats.BannedTotal), jail,
 	)
+}
+
+func (c *Collector) collectJailConfigMetrics(ch chan<- prometheus.Metric, s *socket.Fail2BanSocket, jail string) {
+	banTime, err := s.GetJailBanTime(jail)
+	if err != nil {
+		c.socketRequestErrorCount++
+		log.Printf("failed to get ban time for jail %s: %v", jail, err)
+	} else {
+		ch <- prometheus.MustNewConstMetric(
+			metricJailBanTime, prometheus.GaugeValue, float64(banTime), jail,
+		)
+	}
+	findTime, err := s.GetJailFindTime(jail)
+	if err != nil {
+		c.socketRequestErrorCount++
+		log.Printf("failed to get find time for jail %s: %v", jail, err)
+	} else {
+		ch <- prometheus.MustNewConstMetric(
+			metricJailFindTime, prometheus.GaugeValue, float64(findTime), jail,
+		)
+	}
+	maxRetry, err := s.GetJailMaxRetries(jail)
+	if err != nil {
+		c.socketRequestErrorCount++
+		log.Printf("failed to get max retries for jail %s: %v", jail, err)
+	} else {
+		ch <- prometheus.MustNewConstMetric(
+			metricJailMaxRetry, prometheus.GaugeValue, float64(maxRetry), jail,
+		)
+	}
 }
 
 func (c *Collector) collectVersionMetric(ch chan<- prometheus.Metric, s *socket.Fail2BanSocket) {

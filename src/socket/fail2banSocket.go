@@ -118,6 +118,21 @@ func (s *Fail2BanSocket) GetJailStats(jail string) (JailStats, error) {
 	return stats, newBadFormatError(statusCommand, response)
 }
 
+func (s *Fail2BanSocket) GetJailBanTime(jail string) (int, error) {
+	command := fmt.Sprintf(banTimeCommandFmt, jail)
+	return s.sendSimpleIntCommand(command)
+}
+
+func (s *Fail2BanSocket) GetJailFindTime(jail string) (int, error) {
+	command := fmt.Sprintf(findTimeCommandFmt, jail)
+	return s.sendSimpleIntCommand(command)
+}
+
+func (s *Fail2BanSocket) GetJailMaxRetries(jail string) (int, error) {
+	command := fmt.Sprintf(maxRetriesCommandFmt, jail)
+	return s.sendSimpleIntCommand(command)
+}
+
 func (s *Fail2BanSocket) GetServerVersion() (string, error) {
 	response, err := s.sendCommand([]string{versionCommand})
 	if err != nil {
@@ -130,6 +145,22 @@ func (s *Fail2BanSocket) GetServerVersion() (string, error) {
 		}
 	}
 	return "", newBadFormatError(versionCommand, response)
+}
+
+// sendSimpleIntCommand sends a command to the fail2ban socket and parses the response to extract an int.
+// This command assumes that the response data is in the format of `(d, d)` where `d` is a number.
+func (s *Fail2BanSocket) sendSimpleIntCommand(command string) (int, error) {
+	response, err := s.sendCommand(strings.Split(command, " "))
+	if err != nil {
+		return -1, err
+	}
+
+	if lvl1, ok := response.(*types.Tuple); ok {
+		if banTime, ok := lvl1.Get(1).(int); ok {
+			return banTime, nil
+		}
+	}
+	return -1, newBadFormatError(command, response)
 }
 
 func newBadFormatError(command string, data interface{}) error {

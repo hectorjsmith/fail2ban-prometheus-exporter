@@ -157,6 +157,9 @@ Exposed metrics:
 * `jail_banned_total` (per jail) - Total number of banned IPs since fail2ban startup (includes expired bans)
 * `jail_failed_current` (per jail) - Number of current failures
 * `jail_failed_total` (per jail) - Total number of failures since fail2ban startup
+* `jail_config_ban_time` (per jail) - How long an IP is banned for in this jail (in seconds)
+* `jail_config_find_time` (per jail) - How far back the filter will look for failures in this jail (in seconds)
+* `jail_config_max_retry` (per jail) - The max number of failures allowed before banning an IP in this jail
 * `version` - Version string of the exporter and fail2ban
 
 **Sample**
@@ -186,6 +189,18 @@ f2b_jail_failed_current{jail="sshd"} 6
 # TYPE f2b_jail_failed_total gauge
 f2b_jail_failed_total{jail="recidive"} 7
 f2b_jail_failed_total{jail="sshd"} 125
+# HELP f2b_config_jail_ban_time How long an IP is banned for in this jail (in seconds)
+# TYPE f2b_config_jail_ban_time gauge
+f2b_config_jail_ban_time{jail="recidive"} 604800
+f2b_config_jail_ban_time{jail="sshd"} 600
+# HELP f2b_config_jail_find_time How far back will the filter look for failures in this jail (in seconds)
+# TYPE f2b_config_jail_find_time gauge
+f2b_config_jail_find_time{jail="recidive"} 86400
+f2b_config_jail_find_time{jail="sshd"} 600
+# HELP f2b_config_jail_max_retries The number of failures allowed until the IP is banned by this jail
+# TYPE f2b_config_jail_max_retries gauge
+f2b_config_jail_max_retries{jail="recidive"} 5
+f2b_config_jail_max_retries{jail="sshd"} 5
 # HELP f2b_up Check if the fail2ban server is up
 # TYPE f2b_up gauge
 f2b_up 1
