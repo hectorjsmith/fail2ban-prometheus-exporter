@@ -15,21 +15,10 @@ Once the exporter is running, metrics are available at `localhost:9191/metrics`.
 
 (The default port is `9191` but can be modified with the `-port` flag)
 
-### 1.1. Socket
-The recommended way to run the exporter is to point it at the fail2ban server socket.
-This allows the exporter to communicate with the server the same way `fail2ban-client` does and ensures the metrics it collects align with the values reported by `fail2ban-client status <jail>`.
+The exporter communicates with the fail2ban server over its socket.
+This allows the data collected by the exporter to always align with the output of the `fail2ban-client`.
 
-The default path to the socket is: `/var/run/fail2ban/fail2ban.sock`
-
-### 1.2. Deprecated: Database
-The original way to collect metrics is to read them from the fail2ban database.
-This has now been deprecated in favour of using the socket.
-The reason being that database metrics do not always align with the output of `fail2ban-client status <jail>` and cause confusion.
-See [#11](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/-/issues/11) for more details.
-
-If necessary, these metrics can still be exported by providing the database path to the exporter.
-
-The default path to the fail2ban database is: `/var/lib/fail2ban/fail2ban.sqlite3`
+The default location of the socket is: `/var/run/fail2ban/fail2ban.sock`
 
 ## 2. Running the Exporter
 
@@ -44,8 +33,6 @@ See the [releases page](https://gitlab.com/hectorjsmith/fail2ban-prometheus-expo
 ```
 $ fail2ban-prometheus-exporter -h
 
-  -db string
-        path to the fail2ban sqlite database (deprecated)
   -port int
         port to use for the metrics server (default 9191)
   -socket string
@@ -64,7 +51,7 @@ $ fail2ban-prometheus-exporter -h
 fail2ban-prometheus-exporter -socket /var/run/fail2ban/fail2ban.sock -port 9191
 ```
 
-Note that the exporter will need read access to the fail2ban socket or database.
+Note that the exporter will need read access to the fail2ban socket.
 
 ### 2.1. Compile from Source
 
@@ -75,7 +62,7 @@ Run `go mod download` to download all necessary dependencies before running the 
 
 ## 3. Running in Docker
 
-If use of docker is desired, an official docker image is available on the Gitlab container registry.
+An official docker image is available on the Gitlab container registry.
 Use it by pulling the following image:
 
 ```
@@ -87,11 +74,10 @@ See the [registry page](https://gitlab.com/hectorjsmith/fail2ban-prometheus-expo
 
 ### 3.1. Volumes
 
-The docker image is designed to run by mounting either the fail2ban sqlite3 database of the fail2ban run folder.
-- The database should be mounted at: `/app/fail2ban.sqlite3`
-- The run folder should be mounted at: `/var/run/fail2ban`
+The docker image is designed to run by mounting the fail2ban run folder.
+The run folder should be mounted in the container at: `/var/run/fail2ban`.
 
-Both paths can be mounted with readonly (`ro`) permissions.
+The folder can be mounted with read-only (`ro`) permissions.
 
 **NOTE:** While it is possible to mount the `fail2ban.sock` file directly, it is recommended to mount the parent folder instead.
 The `.sock` file is deleted by fail2ban on shutdown and re-created on startup and this causes problems for the docker mount.
@@ -104,7 +90,6 @@ Use the following command to run the exporter as a docker container.
 ```
 docker run -d \
     --name "fail2ban-exporter" \
-    -v /var/lib/fail2ban/fail2ban.sqlite3:/app/fail2ban.sqlite3:ro \
     -v /var/run/fail2ban:/var/run/fail2ban:ro \
     -p "9191:9191" \
     registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest
@@ -120,7 +105,6 @@ services:
   exporter:
     image: registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest
     volumes:
-    - /var/lib/fail2ban/fail2ban.sqlite3:/app/fail2ban.sqlite3:ro
     - /var/run/fail2ban/:/var/run/fail2ban:ro
     ports:
     - "9191:9191"
@@ -221,50 +205,7 @@ Status for the jail: sshd|- Filter
    `- Banned IP list:   ...
 ```
 
-### 4.2. Database Metrics (deprecated)
-
-These are the original metrics exported by the initial release of the exporter.
-They are all based on the data stored in the fail2ban sqlite3 database.
-
-*These metrics are deprecated and will be removed in a future release.*
-
-All metrics are prefixed with `fail2ban_`.
-
-Exposed metrics:
-* `up` - Returns 1 if the service is up
-* `errors` - Returns the number of errors found since startup
-* `enabled_jails` - Returns 1 for each jail that is enabled, 0 if disabled.
-* `bad_ips` (per jail)
-    * A *bad IP* is defined as an IP that has been banned at least once in the past
-    * Bad IPs are counted per jail
-* `banned_ips` (per jail)
-    * A *banned IP* is defined as an IP that is currently banned on the firewall
-    * Banned IPs are counted per jail
-
-**Sample**
-
-```
-# HELP fail2ban_bad_ips (Deprecated) Number of bad IPs stored in the database (per jail).
-# TYPE fail2ban_bad_ips gauge
-fail2ban_bad_ips{jail="recidive"} 0
-fail2ban_bad_ips{jail="sshd"} 0
-# HELP fail2ban_banned_ips (Deprecated) Number of banned IPs stored in the database (per jail).
-# TYPE fail2ban_banned_ips gauge
-fail2ban_banned_ips{jail="recidive"} 0
-fail2ban_banned_ips{jail="sshd"} 0
-# HELP fail2ban_enabled_jails (Deprecated) Enabled jails.
-# TYPE fail2ban_enabled_jails gauge
-fail2ban_enabled_jails{jail="recidive"} 1
-fail2ban_enabled_jails{jail="sshd"} 1
-# HELP fail2ban_errors (Deprecated) Number of errors found since startup.
-# TYPE fail2ban_errors counter
-fail2ban_errors{type="db"} 0
-# HELP fail2ban_up (Deprecated) Was the last fail2ban query successful.
-# TYPE fail2ban_up gauge
-fail2ban_up 1
-```
-
-### 4.3. Textfile Metrics
+### 4.2. Textfile Metrics
 
 For more flexibility the exporter also allows exporting metrics collected from a text file.
 

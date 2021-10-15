@@ -170,14 +170,10 @@ func (c *Collector) collectJailConfigMetrics(ch chan<- prometheus.Metric, s *soc
 }
 
 func (c *Collector) collectVersionMetric(ch chan<- prometheus.Metric, s *socket.Fail2BanSocket) {
-	var err error
-	var fail2banVersion = ""
-	if s != nil {
-		fail2banVersion, err = s.GetServerVersion()
-		if err != nil {
-			c.socketRequestErrorCount++
-			log.Printf("failed to get fail2ban server version: %v", err)
-		}
+	fail2banVersion, err := s.GetServerVersion()
+	if err != nil {
+		c.socketRequestErrorCount++
+		log.Printf("failed to get fail2ban server version: %v", err)
 	}
 
 	ch <- prometheus.MustNewConstMetric(
