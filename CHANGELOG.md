@@ -5,7 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog], and this project adheres to [Semantic Versioning].
 
 ## [Unreleased]
-*Nothing yet*
+
+### Added
+- (56730c8) feat: add new jail config metrics
+- (5a107cc) feat: support for textfile metrics ([#13](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/issues/13))
+
+### Removed
+- (b268f86) remove: database-based metrics
+- (0b6a941) remove: windows builds
 
 ## [0.3.0] - 2021-09-27
 *Export new version metrics ([#12](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/issues/12))*
