@@ -1,20 +1,22 @@
-install-deps:
+go/dependencies:
 	cd src/ && go mod download
 
-# Standard go test
-test:
-	cd src/ && go test ./... -v -race
-
 # Make sure no unnecessary dependencies are present
-go-mod-tidy:
+go/checkDependencies:
 	cd src/ && go mod tidy -v
 	git diff-index --quiet HEAD
 
-format:
-	cd src/ && go fmt $(go list ./... | grep -v /vendor/)
-	cd src/ && go vet $(go list ./... | grep -v /vendor/)
+# Standard go test
+go/test:
+	cd src/ && go test ./... -v -race
 
-generateChangelog:
+go/fmt:
+	cd src/ && go fmt ./...
+
+go/checkFmt:
+	test -z $(shell gofmt -l .)
+
+docs/genChangelog:
 	./tools/git-chglog_linux_amd64 --config tools/chglog/config.yml 0.0.0.. > CHANGELOG_gen.md
 
 build/snapshot:
@@ -27,8 +29,8 @@ build/docker:
 	cd src/ && go build -o exporter \
      -ldflags '-X main.version=$(shell git describe --tags) -X main.commit=${shell git rev-parse HEAD} -X "main.date=${shell date --rfc-3339=seconds}" -X main.builtBy=docker' exporter.go
 
-docker/build-latest:
+docker/build/latest:
 	docker build -t registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest .
 
-docker/build-tag:
+docker/build/tag:
 	docker build -t registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:$(shell git describe --tags) .

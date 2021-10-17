@@ -1,21 +1,26 @@
 image: golang:latest
 
 before_script:
-  - make install-deps
+  - make go/dependencies
 
 stages:
   - test
   - build
 
+dependencies:
+  stage: test
+  script:
+    - make go/checkDependencies
+
 format:
   stage: test
   script:
-    - make format
+    - make go/checkFmt
 
 test:
   stage: test
   script:
-    - make test
+    - make go/test
 
 build:
   stage: build
@@ -31,7 +36,7 @@ build:
       - dist/checksums.txt
     expire_in: 1 day
 
-docker-gitlab:
+docker/gitlab:
   stage: build
   only:
     - main
@@ -44,6 +49,6 @@ docker-gitlab:
     - apk add make
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
-    - make docker/build-latest
-    - make docker/build-tag
+    - make docker/build/latest
+    - make docker/build/tag
     - docker push registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter
