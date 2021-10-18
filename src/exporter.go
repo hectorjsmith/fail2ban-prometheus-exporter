@@ -3,12 +3,11 @@ package main
 import (
 	"fail2ban-prometheus-exporter/cfg"
 	"fail2ban-prometheus-exporter/collector/f2b"
-	textfile2 "fail2ban-prometheus-exporter/collector/textfile"
+	"fail2ban-prometheus-exporter/collector/textfile"
 	"fmt"
 	"log"
 	"net/http"
 
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -44,7 +43,7 @@ func rootHtmlHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func metricHandler(w http.ResponseWriter, r *http.Request, collector *textfile2.Collector) {
+func metricHandler(w http.ResponseWriter, r *http.Request, collector *textfile.Collector) {
 	promhttp.Handler().ServeHTTP(w, r)
 	collector.WriteTextFileMetrics(w, r)
 }
@@ -61,7 +60,7 @@ func main() {
 		f2bCollector := f2b.NewExporter(appSettings, version)
 		prometheus.MustRegister(f2bCollector)
 
-		textFileCollector := textfile2.NewCollector(appSettings)
+		textFileCollector := textfile.NewCollector(appSettings)
 		prometheus.MustRegister(textFileCollector)
 
 		http.HandleFunc("/", rootHtmlHandler)

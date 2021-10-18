@@ -4,7 +4,6 @@ go 1.15
 
 require (
 	github.com/kisielk/og-rek v1.1.0
-	github.com/mattn/go-sqlite3 v1.14.6
 	github.com/nlpodyssey/gopickle v0.1.0
 	github.com/prometheus/client_golang v1.9.0
 )
