@@ -59,7 +59,7 @@ func (s *Fail2BanSocket) read() (interface{}, error) {
 	unpickler := pickle.NewUnpickler(bufReader)
 
 	unpickler.FindClass = func(module, name string) (interface{}, error) {
-		if module == "builtins" && name == "str" {
+		if (module == "builtins" || module == "__builtin__") && name == "str" {
 			return &Py_builtins_str{}, nil
 		}
 		return nil, fmt.Errorf("class not found: " + module + " : " + name)
