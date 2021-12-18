@@ -13,6 +13,7 @@ const (
 
 type AppSettings struct {
 	VersionMode          bool
+	MetricsAddress       string
 	MetricsPort          int
 	Fail2BanSocketPath   string
 	FileCollectorPath    string
@@ -22,6 +23,7 @@ type AppSettings struct {
 func Parse() *AppSettings {
 	appSettings := &AppSettings{}
 	flag.BoolVar(&appSettings.VersionMode, "version", false, "show version info and exit")
+	flag.StringVar(&appSettings.MetricsAddress, "web.listen-address", "0.0.0.0", "address to use for the metrics server")
 	flag.IntVar(&appSettings.MetricsPort, "port", 9191, "port to use for the metrics server")
 	flag.StringVar(&appSettings.Fail2BanSocketPath, "socket", "", "path to the fail2ban server socket")
 	flag.BoolVar(&appSettings.FileCollectorEnabled, "collector.textfile", false, "enable the textfile collector")

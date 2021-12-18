@@ -53,7 +53,7 @@ func main() {
 	if appSettings.VersionMode {
 		printAppVersion()
 	} else {
-		addr := fmt.Sprintf("0.0.0.0:%d", appSettings.MetricsPort)
+		addr := fmt.Sprintf("%s:%d", appSettings.MetricsAddress, appSettings.MetricsPort)
 
 		log.Printf("starting fail2ban exporter at %s", addr)
 
