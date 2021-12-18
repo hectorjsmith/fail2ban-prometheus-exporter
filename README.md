@@ -33,6 +33,8 @@ See the [releases page](https://gitlab.com/hectorjsmith/fail2ban-prometheus-expo
 ```
 $ fail2ban-prometheus-exporter -h
 
+  -web.listen-address string
+        address to use for metrics server (default 0.0.0.0)
   -port int
         port to use for the metrics server (default 9191)
   -socket string
