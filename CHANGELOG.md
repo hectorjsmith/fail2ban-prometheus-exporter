@@ -7,6 +7,20 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 ## [Unreleased]
 *Nothing yet*
 
+## [0.5.0] - 2021-12-21
+*Remove deprecated code & support python2*
+
+### Added
+- (b397a51) feat: sample grafana dashboard ([#15](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/issues/15))
+- (c208c8e) feat: add listen address parameter - thanks [@private-creator](https://gitlab.com/private-creator)!
+
+### Fixed
+- (7932ccb) fix: support python2 fail2ban ([#14](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/issues/14)) - thanks [@private-creator](https://gitlab.com/private-creator)!
+
+### BREAKING CHANGE
+- Remove `-db` CLI flag
+- Remove `f2b_errors{type="db"}` metric
+
 ## [0.4.0] - 2021-10-18
 *Add new fail2ban config metrics*
 
@@ -70,3 +84,4 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 [0.2.0]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.1.0...0.2.0
 [0.3.0]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.2.0...0.3.0
 [0.4.0]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.3.0...0.4.0
+[0.5.0]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.4.0...0.5.0
