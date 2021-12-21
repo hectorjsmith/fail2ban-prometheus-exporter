@@ -29,9 +29,6 @@ func Parse() *AppSettings {
 	flag.BoolVar(&appSettings.FileCollectorEnabled, "collector.textfile", false, "enable the textfile collector")
 	flag.StringVar(&appSettings.FileCollectorPath, "collector.textfile.directory", "", "directory to read text files with metrics from")
 
-	// deprecated: to be removed in next version
-	_ = flag.String("db", "", "path to the fail2ban sqlite database (removed)")
-
 	flag.Parse()
 	appSettings.validateFlags()
 	return appSettings

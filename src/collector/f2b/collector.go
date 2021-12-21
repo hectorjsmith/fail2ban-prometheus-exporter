@@ -11,7 +11,6 @@ type Collector struct {
 	socketPath                 string
 	exporterVersion            string
 	lastError                  error
-	dbErrorCount               int
 	socketConnectionErrorCount int
 	socketRequestErrorCount    int
 }
@@ -21,7 +20,6 @@ func NewExporter(appSettings *cfg.AppSettings, exporterVersion string) *Collecto
 		socketPath:                 appSettings.Fail2BanSocketPath,
 		exporterVersion:            exporterVersion,
 		lastError:                  nil,
-		dbErrorCount:               0,
 		socketConnectionErrorCount: 0,
 		socketRequestErrorCount:    0,
 	}
