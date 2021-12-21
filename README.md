@@ -9,7 +9,7 @@ Go tool to collect and export metrics on Fail2Ban
 4. Metrics
 
 ## 1. Introduction
-The exporter can collect metrics from 2 locations: the fail2ban server socket and the fail2ban server database.
+This exporter collects metrics from a running fail2ban instance.
 
 Once the exporter is running, metrics are available at `localhost:9191/metrics`.
 
@@ -133,7 +133,7 @@ In this configuration, there will be two jails - one for IPs banned from the SSH
 This tool exports several metrics *per jail*, meaning that it is possible to track how many IPs are being banned in each jail as well as the overall total.
 This can be useful to track what services are seeing more failed logins.
 
-### 4.1. Socket-based Metrics
+### 4.1. Fail2Ban Metrics
 
 These are the metrics exported by reading data from the fail2ban server socket.
 All metrics are prefixed with `f2b_`.
@@ -141,7 +141,6 @@ All metrics are prefixed with `f2b_`.
 Exposed metrics:
 * `up` - Returns 1 if the fail2ban server is up and connection succeeds
 * `errors` - Number of errors since startup
-    * `db` - Errors connecting to the database
     * `socket_conn` - Errors connecting to the fail2ban socket (e.g. connection refused)
     * `socket_req` - Errors sending requests to the fail2ban server (e.g. invalid responses)
 * `jail_count` - Number of jails configured in fail2ban
@@ -159,7 +158,6 @@ Exposed metrics:
 ```
 # HELP f2b_errors Number of errors found since startup
 # TYPE f2b_errors counter
-f2b_errors{type="db"} 0
 f2b_errors{type="socket_conn"} 0
 f2b_errors{type="socket_req"} 0
 # HELP f2b_jail_banned_current Number of IPs currently banned in this jail

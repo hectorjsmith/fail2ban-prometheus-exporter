@@ -70,9 +70,6 @@ var (
 
 func (c *Collector) collectErrorCountMetric(ch chan<- prometheus.Metric) {
 	ch <- prometheus.MustNewConstMetric(
-		metricErrorCount, prometheus.CounterValue, float64(c.dbErrorCount), "db",
-	)
-	ch <- prometheus.MustNewConstMetric(
 		metricErrorCount, prometheus.CounterValue, float64(c.socketConnectionErrorCount), "socket_conn",
 	)
 	ch <- prometheus.MustNewConstMetric(
