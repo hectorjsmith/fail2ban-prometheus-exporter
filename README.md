@@ -24,7 +24,7 @@ The default location of the socket is: `/var/run/fail2ban/fail2ban.sock`
 
 The metrics exported by this tool are compatible with Prometheus and Grafana. A sample grafana dashboard can be found in the `grafana.json` file. Just import the contents of this file into a new Grafana dashboard to get started.
 
-*(Sample dashboard is compatible with Grafana `8.2.1` and above)*
+*(Sample dashboard is compatible with Grafana `8.3.3` and above)*
 
 ## 2. Running the Exporter
 
