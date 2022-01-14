@@ -39,18 +39,22 @@ See the [releases page](https://gitlab.com/hectorjsmith/fail2ban-prometheus-expo
 ```
 $ fail2ban-prometheus-exporter -h
 
-  -web.listen-address string
-        address to use for metrics server (default 0.0.0.0)
+  -collector.textfile
+        enable the textfile collector
+  -collector.textfile.directory string
+        directory to read text files with metrics from
   -port int
         port to use for the metrics server (default 9191)
   -socket string
         path to the fail2ban server socket
   -version
         show version info and exit
-  -collector.textfile
-        enable the textfile collector
-  -collector.textfile.directory string
-        directory to read text files with metrics from
+  -web.basic-auth.password string
+        password to use to protect endpoints with basic auth
+  -web.basic-auth.username string
+        username to use to protect endpoints with basic auth
+  -web.listen-address string
+        address to use for the metrics server (default "0.0.0.0")
 ```
 
 **Example**
