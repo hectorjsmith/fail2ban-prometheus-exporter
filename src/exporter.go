@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fail2ban-prometheus-exporter/auth"
 	"fail2ban-prometheus-exporter/cfg"
 	"fail2ban-prometheus-exporter/collector/f2b"
 	"fail2ban-prometheus-exporter/collector/textfile"
@@ -63,10 +64,13 @@ func main() {
 		textFileCollector := textfile.NewCollector(appSettings)
 		prometheus.MustRegister(textFileCollector)
 
-		http.HandleFunc("/", rootHtmlHandler)
-		http.HandleFunc(metricsPath, func(w http.ResponseWriter, r *http.Request) {
-			metricHandler(w, r, textFileCollector)
-		})
+		http.HandleFunc("/", auth.BasicAuthMiddleware(rootHtmlHandler, appSettings.BasicAuthProvider))
+		http.HandleFunc(metricsPath, auth.BasicAuthMiddleware(
+			func(w http.ResponseWriter, r *http.Request) {
+				metricHandler(w, r, textFileCollector)
+			},
+			appSettings.BasicAuthProvider,
+		))
 		log.Printf("metrics available at '%s'", metricsPath)
 
 		svrErr := make(chan error)
