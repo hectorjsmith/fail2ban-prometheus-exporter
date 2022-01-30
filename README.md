@@ -35,26 +35,39 @@ No additional runtime dependencies are required.
 Compiled binaries for various platforms are provided in each release.
 See the [releases page](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/-/releases) for more information.
 
-**Usage**
+**CLI Usage**
 ```
 $ fail2ban-prometheus-exporter -h
+usage: exporter [<flags>]
 
-  -collector.textfile
-        enable the textfile collector
-  -collector.textfile.directory string
-        directory to read text files with metrics from
-  -port int
-        port to use for the metrics server (default 9191)
-  -socket string
-        path to the fail2ban server socket
-  -version
-        show version info and exit
-  -web.basic-auth.password string
-        password to use to protect endpoints with basic auth
-  -web.basic-auth.username string
-        username to use to protect endpoints with basic auth
-  -web.listen-address string
-        address to use for the metrics server (default "0.0.0.0")
+Flags:
+  -h, --help                Show context-sensitive help (also try --help-long and --help-man).
+      --version             show version info and exit
+      --port=9191           port to use for the metrics server
+      --web.listen-address="0.0.0.0"
+                            address to use for the metrics server
+      --socket=""           path to the fail2ban server socket
+      --collector.textfile  enable the textfile collector
+      --collector.textfile.directory=""
+                            directory to read text files with metrics from
+      --web.basic-auth.username=""
+                            username to use to protect endpoints with basic auth
+      --web.basic-auth.password=""
+                            password to use to protect endpoints with basic auth
+```
+
+**Environment variables**
+
+The tool can also be configured using environment variables. Each CLI parameter has a corresponding environment variable.
+
+```
+F2B_COLLECTOR_SOCKET
+F2B_COLLECTOR_TEXT
+F2B_COLLECTOR_TEXT_PATH
+F2B_WEB_PORT
+F2B_WEB_LISTEN_ADDRESS
+F2B_WEB_BASICAUTH_USER
+F2B_WEB_BASICAUTH_PASS
 ```
 
 **Example**

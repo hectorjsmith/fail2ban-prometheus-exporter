@@ -15,6 +15,6 @@ fi
 # Start the exporter (use exec to support graceful shutdown)
 # Inspired by: https://akomljen.com/stopping-docker-containers-gracefully/
 exec /app/fail2ban-prometheus-exporter \
-    -socket "$socket_path" \
-    -collector.textfile=$textfile_enabled \
-    -collector.textfile.directory="$textfile_dir"
+    --socket "$socket_path" \
+    --collector.textfile=$textfile_enabled \
+    --collector.textfile.directory="$textfile_dir"

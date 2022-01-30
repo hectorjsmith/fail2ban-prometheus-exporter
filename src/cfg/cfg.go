@@ -3,12 +3,20 @@ package cfg
 import (
 	"flag"
 	"fmt"
+	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
 )
 
 const (
-	minServerPort = 1000
-	maxServerPort = 65535
+	minServerPort               = 1000
+	maxServerPort               = 65535
+	socketEnvName               = "F2B_COLLECTOR_SOCKET"
+	fileCollectorEnabledEnvName = "F2B_COLLECTOR_TEXT"
+	fileCollectorPathEnvName    = "F2B_COLLECTOR_TEXT_PATH"
+	portEnvName                 = "F2B_WEB_PORT"
+	addressEnvName              = "F2B_WEB_LISTEN_ADDRESS"
+	basicAuthUserEnvName        = "F2B_WEB_BASICAUTH_USER"
+	basicAuthPassEnvName        = "F2B_WEB_BASICAUTH_PASS"
 )
 
 type AppSettings struct {
@@ -21,24 +29,67 @@ type AppSettings struct {
 	BasicAuthProvider    *hashedBasicAuth
 }
 
+func init() {
+	kingpin.HelpFlag.Short('h')
+}
+
 func Parse() *AppSettings {
-	var rawBasicAuthUsername string
-	var rawBasicAuthPassword string
+	settings := &AppSettings{}
+	readParamsFromCli(settings)
+	settings.validateFlags()
+	return settings
+}
 
-	appSettings := &AppSettings{}
-	flag.BoolVar(&appSettings.VersionMode, "version", false, "show version info and exit")
-	flag.StringVar(&appSettings.MetricsAddress, "web.listen-address", "0.0.0.0", "address to use for the metrics server")
-	flag.IntVar(&appSettings.MetricsPort, "port", 9191, "port to use for the metrics server")
-	flag.StringVar(&appSettings.Fail2BanSocketPath, "socket", "", "path to the fail2ban server socket")
-	flag.BoolVar(&appSettings.FileCollectorEnabled, "collector.textfile", false, "enable the textfile collector")
-	flag.StringVar(&appSettings.FileCollectorPath, "collector.textfile.directory", "", "directory to read text files with metrics from")
-	flag.StringVar(&rawBasicAuthUsername, "web.basic-auth.username", "", "username to use to protect endpoints with basic auth")
-	flag.StringVar(&rawBasicAuthPassword, "web.basic-auth.password", "", "password to use to protect endpoints with basic auth")
+func readParamsFromCli(settings *AppSettings) {
+	versionMode := kingpin.
+		Flag("version", "show version info and exit").
+		Default("false").
+		Bool()
+	socketPath := kingpin.
+		Flag("socket", "path to the fail2ban server socket").
+		Default("").
+		Envar(socketEnvName).
+		String()
+	fileCollectorEnabled := kingpin.
+		Flag("collector.textfile", "enable the textfile collector").
+		Default("false").
+		Envar(fileCollectorEnabledEnvName).
+		Bool()
+	fileCollectorPath := kingpin.
+		Flag("collector.textfile.directory", "directory to read text files with metrics from").
+		Default("").
+		Envar(fileCollectorPathEnvName).
+		String()
+	port := kingpin.
+		Flag("port", "port to use for the metrics server").
+		Default("9191").
+		Envar(portEnvName).
+		Int()
+	address := kingpin.
+		Flag("web.listen-address", "address to use for the metrics server").
+		Default("0.0.0.0").
+		Envar(addressEnvName).
+		String()
+	rawBasicAuthUsername := kingpin.
+		Flag("web.basic-auth.username", "username to use to protect endpoints with basic auth").
+		Default("").
+		Envar(basicAuthUserEnvName).
+		String()
+	rawBasicAuthPassword := kingpin.
+		Flag("web.basic-auth.password", "password to use to protect endpoints with basic auth").
+		Default("").
+		Envar(basicAuthPassEnvName).
+		String()
 
-	flag.Parse()
-	appSettings.setBasicAuthValues(rawBasicAuthUsername, rawBasicAuthPassword)
-	appSettings.validateFlags()
-	return appSettings
+	settings.VersionMode = *versionMode
+	settings.MetricsPort = *port
+	settings.MetricsAddress = *address
+	settings.Fail2BanSocketPath = *socketPath
+	settings.FileCollectorEnabled = *fileCollectorEnabled
+	settings.FileCollectorPath = *fileCollectorPath
+	settings.setBasicAuthValues(*rawBasicAuthUsername, *rawBasicAuthPassword)
+
+	kingpin.Parse()
 }
 
 func (settings *AppSettings) setBasicAuthValues(rawUsername, rawPassword string) {
