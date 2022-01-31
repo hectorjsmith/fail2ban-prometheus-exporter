@@ -81,6 +81,8 @@ func readParamsFromCli(settings *AppSettings) {
 		Envar(basicAuthPassEnvName).
 		String()
 
+	kingpin.Parse()
+
 	settings.VersionMode = *versionMode
 	settings.MetricsPort = *port
 	settings.MetricsAddress = *address
@@ -88,8 +90,6 @@ func readParamsFromCli(settings *AppSettings) {
 	settings.FileCollectorEnabled = *fileCollectorEnabled
 	settings.FileCollectorPath = *fileCollectorPath
 	settings.setBasicAuthValues(*rawBasicAuthUsername, *rawBasicAuthPassword)
-
-	kingpin.Parse()
 }
 
 func (settings *AppSettings) setBasicAuthValues(rawUsername, rawPassword string) {
