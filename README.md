@@ -94,7 +94,7 @@ Use it by pulling the following image:
 registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest
 ```
 
-Use the `:latest` tag to get the most up to date code (less stable) or use one of the version tagged images to use a specific release.
+Use the `:latest` tag to get the latest stable release. Or use the `:nightly` tag for the latest (unstable) version.
 See the [registry page](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/container_registry) for all available tags.
 
 ### 3.1. Volumes
