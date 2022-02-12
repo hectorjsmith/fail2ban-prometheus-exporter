@@ -32,5 +32,8 @@ build/docker:
 docker/build/latest:
 	docker build -t registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest .
 
+docker/build/nightly:
+	docker build -t registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:nightly .
+
 docker/build/tag:
 	docker build -t registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:$(shell git describe --tags) .

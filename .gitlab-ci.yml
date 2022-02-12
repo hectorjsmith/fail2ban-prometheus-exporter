@@ -1,28 +1,41 @@
-image: golang:latest
-
-before_script:
-  - make go/dependencies
-
 stages:
   - test
   - build
 
+.go_template:
+  image: golang:latest
+  before_script:
+    - make go/dependencies
+
+.docker_template:
+  image: docker:stable
+  services:
+    - docker:dind
+  before_script:
+    - apk add git
+    - apk add make
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
 dependencies:
+  extends: .go_template
   stage: test
   script:
     - make go/checkDependencies
 
 format:
+  extends: .go_template
   stage: test
   script:
     - make go/checkFmt
 
 test:
+  extends: .go_template
   stage: test
   script:
     - make go/test
 
 build:
+  extends: .go_template
   stage: build
   only:
     - main
@@ -37,18 +50,20 @@ build:
     expire_in: 1 day
 
 docker/gitlab:
+  extends: .docker_template
   stage: build
   only:
-    - main
     - tags
-  image: docker:stable
-  services:
-    - docker:dind
-  before_script:
-    - apk add git
-    - apk add make
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
     - make docker/build/latest
     - make docker/build/tag
+    - docker push registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter
+
+docker/gitlab/nightly:
+  extends: .docker_template
+  stage: build
+  only:
+    - main
+  script:
+    - make docker/build/nightly
     - docker push registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter
