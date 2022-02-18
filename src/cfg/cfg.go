@@ -47,7 +47,7 @@ func readParamsFromCli(settings *AppSettings) {
 		Bool()
 	socketPath := kingpin.
 		Flag("socket", "path to the fail2ban server socket").
-		Default("").
+		Default("/var/run/fail2ban/fail2ban.sock").
 		Envar(socketEnvName).
 		String()
 	fileCollectorEnabled := kingpin.
