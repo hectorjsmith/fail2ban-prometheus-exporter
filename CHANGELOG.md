@@ -5,7 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog], and this project adheres to [Semantic Versioning].
 
 ## [Unreleased]
-*Nothing yet*
+
+### Added
+- (b7e317e) feat: configure tool using environment variables ([#17](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/issues/17))
+- (6f76a03) feat: add support for basic auth ([#16](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/issues/16))
+
+### Fixed
+- (93da909) fix: use correct flag in dockerfile ([#18](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/issues/18))
+
+### BREAKING CHANGE
+- CLI params now require two dashes instead of one (e.g. `--socket`)
 
 ## [0.5.0] - 2021-12-21
 *Remove deprecated code & support python2*
