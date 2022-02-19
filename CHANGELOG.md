@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 ## [Unreleased]
 
 ### Added
+- (6e575aa) feat: rewrite cli flags and environment variables
+- (0f0efe5) feat: remove startup script from docker image
+- (e2902b8) feat: improve logging on startup
+- (1f27dac) feat: add default value for fail2ban socket path
 - (b7e317e) feat: configure tool using environment variables ([#17](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/issues/17))
 - (6f76a03) feat: add support for basic auth ([#16](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/issues/16))
 
@@ -14,7 +18,12 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 - (93da909) fix: use correct flag in dockerfile ([#18](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/issues/18))
 
 ### BREAKING CHANGE
-- CLI params now require two dashes instead of one (e.g. `--socket`)
+- Replace `--socket` flag with `--collector.f2b.socket`.
+- Merge `--port` flag and `--web.listen-address` into a single flag.
+- Remove `--collector.textfile` flag, its value is now derived from `--collector.textfile.directory`.
+- Remove `F2B_COLLECTOR_TEXT` and `F2B_WEB_PORT` environment variables.
+- Using the textfile collector in docker now requires setting environment variables.
+- CLI params now require two dashes instead of one (e.g. `--socket`).
 
 ## [0.5.0] - 2021-12-21
 *Remove deprecated code & support python2*
