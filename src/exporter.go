@@ -55,8 +55,8 @@ func main() {
 		printAppVersion()
 	} else {
 		addr := fmt.Sprintf("%s:%d", appSettings.MetricsAddress, appSettings.MetricsPort)
-
-		log.Printf("starting fail2ban exporter at %s", addr)
+		log.Printf("fail2ban exporter version %s", version)
+		log.Printf("starting server at %s", addr)
 
 		f2bCollector := f2b.NewExporter(appSettings, version)
 		prometheus.MustRegister(f2bCollector)
@@ -72,6 +72,9 @@ func main() {
 			appSettings.BasicAuthProvider,
 		))
 		log.Printf("metrics available at '%s'", metricsPath)
+		if appSettings.BasicAuthProvider.Enabled() {
+			log.Printf("basic auth enabled")
+		}
 
 		svrErr := make(chan error)
 		go func() {

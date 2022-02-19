@@ -25,7 +25,7 @@ func NewCollector(appSettings *cfg.AppSettings) *Collector {
 		fileMap:    make(map[string]*fileData),
 	}
 	if collector.enabled {
-		log.Printf("collector.textfile directory: %s", collector.folderPath)
+		log.Printf("reading textfile metrics from: %s", collector.folderPath)
 	}
 	return collector
 }
