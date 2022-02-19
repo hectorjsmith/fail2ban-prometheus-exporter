@@ -13,7 +13,7 @@ This exporter collects metrics from a running fail2ban instance.
 
 Once the exporter is running, metrics are available at `localhost:9191/metrics`.
 
-(The default port is `9191` but can be modified with the `-port` flag)
+(The default port is `9191` but can be modified with the `--port` flag)
 
 The exporter communicates with the fail2ban server over its socket.
 This allows the data collected by the exporter to always align with the output of the `fail2ban-client`.
@@ -73,7 +73,7 @@ F2B_WEB_BASICAUTH_PASS
 **Example**
 
 ```
-fail2ban-prometheus-exporter -socket /var/run/fail2ban/fail2ban.sock -port 9191
+fail2ban-prometheus-exporter --socket /var/run/fail2ban/fail2ban.sock --port 9191
 ```
 
 Note that the exporter will need read access to the fail2ban socket.
@@ -233,8 +233,8 @@ Status for the jail: sshd|- Filter
 For more flexibility the exporter also allows exporting metrics collected from a text file.
 
 To enable textfile metrics:
-1. Enable the collector with `-collector.textfile=true`
-2. Provide the directory to read files from with the `-collector.textfile.directory` flag
+1. Enable the collector with `--collector.textfile=true`
+2. Provide the directory to read files from with the `--collector.textfile.directory` flag
 
 Metrics collected from these files will be exposed directly alongside the other metrics without any additional processing.
 This means that it is the responsibility of the file creator to ensure the format is correct.
@@ -248,3 +248,21 @@ textfile_error{path="file.prom"} 0
 ```
 
 **NOTE:** Any file not ending with `.prom` will be ignored.
+
+**Running in Docker**
+
+To collect textfile metrics inside a docker container, a couple of things need to be done:
+1. Mount the folder with the metrics
+2. Set the relevant environment variables
+
+*For example:*
+```
+docker run -d \
+    --name "fail2ban-exporter" \
+    -v /var/run/fail2ban:/var/run/fail2ban:ro \
+    -v /path/to/metrics:/app/metrics/:ro \
+    -e F2B_COLLECTOR_TEXT=true \
+    -e F2B_COLLECTOR_TEXT_PATH=/app/metrics \
+    -p "9191:9191" \
+    registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest
+```
