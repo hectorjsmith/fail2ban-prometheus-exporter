@@ -1,7 +1,6 @@
 package cfg
 
 import (
-	"flag"
 	"fmt"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
@@ -100,25 +99,25 @@ func (settings *AppSettings) validateFlags() {
 	var flagsValid = true
 	if !settings.VersionMode {
 		if settings.Fail2BanSocketPath == "" {
-			fmt.Println("fail2ban socket path must not be blank")
+			fmt.Println("error: fail2ban socket path must not be blank")
 			flagsValid = false
 		}
 		if settings.MetricsPort < minServerPort || settings.MetricsPort > maxServerPort {
-			fmt.Printf("invalid server port, must be within %d and %d (found %d)\n",
+			fmt.Printf("error: invalid server port, must be within %d and %d (found %d)\n",
 				minServerPort, maxServerPort, settings.MetricsPort)
 			flagsValid = false
 		}
 		if settings.FileCollectorEnabled && settings.FileCollectorPath == "" {
-			fmt.Printf("file collector directory path must not be empty if collector enabled\n")
+			fmt.Println("error: file collector directory path must not be empty if collector enabled")
 			flagsValid = false
 		}
 		if (len(settings.BasicAuthProvider.username) > 0) != (len(settings.BasicAuthProvider.password) > 0) {
-			fmt.Printf("to enable basic auth both the username and the password must be provided")
+			fmt.Println("error: to enable basic auth both the username and the password must be provided")
 			flagsValid = false
 		}
 	}
 	if !flagsValid {
-		flag.Usage()
+		kingpin.Usage()
 		os.Exit(1)
 	}
 }
