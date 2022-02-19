@@ -20,7 +20,7 @@ type fileData struct {
 
 func NewCollector(appSettings *cfg.AppSettings) *Collector {
 	collector := &Collector{
-		enabled:    appSettings.FileCollectorEnabled,
+		enabled:    appSettings.FileCollectorPath != "",
 		folderPath: appSettings.FileCollectorPath,
 		fileMap:    make(map[string]*fileData),
 	}

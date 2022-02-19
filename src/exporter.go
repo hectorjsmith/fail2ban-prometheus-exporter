@@ -54,9 +54,8 @@ func main() {
 	if appSettings.VersionMode {
 		printAppVersion()
 	} else {
-		addr := fmt.Sprintf("%s:%d", appSettings.MetricsAddress, appSettings.MetricsPort)
 		log.Printf("fail2ban exporter version %s", version)
-		log.Printf("starting server at %s", addr)
+		log.Printf("starting server at %s", appSettings.MetricsAddress)
 
 		f2bCollector := f2b.NewExporter(appSettings, version)
 		prometheus.MustRegister(f2bCollector)
@@ -78,7 +77,7 @@ func main() {
 
 		svrErr := make(chan error)
 		go func() {
-			svrErr <- http.ListenAndServe(addr, nil)
+			svrErr <- http.ListenAndServe(appSettings.MetricsAddress, nil)
 		}()
 		log.Print("ready")
 
