@@ -6,11 +6,13 @@ import (
 	"fail2ban-prometheus-exporter/collector/f2b"
 	"fail2ban-prometheus-exporter/collector/textfile"
 	"fmt"
-	"log"
-	"net/http"
-
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 const (
@@ -54,6 +56,7 @@ func main() {
 	if appSettings.VersionMode {
 		printAppVersion()
 	} else {
+		handleGracefulShutdown()
 		log.Printf("fail2ban exporter version %s", version)
 		log.Printf("starting server at %s", appSettings.MetricsAddress)
 
@@ -84,4 +87,17 @@ func main() {
 		err := <-svrErr
 		log.Print(err)
 	}
+}
+
+func handleGracefulShutdown() {
+	var signals = make(chan os.Signal)
+
+	signal.Notify(signals, syscall.SIGTERM)
+	signal.Notify(signals, syscall.SIGINT)
+
+	go func() {
+		sig := <-signals
+		log.Printf("caught signal: %+v", sig)
+		os.Exit(0)
+	}()
 }

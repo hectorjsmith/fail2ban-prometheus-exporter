@@ -20,4 +20,4 @@ WORKDIR /app
 # Copy compiled binary to release image
 COPY --from=build /build/src/exporter /app/fail2ban-prometheus-exporter
 
-ENTRYPOINT /app/fail2ban-prometheus-exporter
+ENTRYPOINT ["/app/fail2ban-prometheus-exporter"]
