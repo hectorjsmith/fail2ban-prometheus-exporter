@@ -18,6 +18,6 @@ FROM debian:buster-slim
 WORKDIR /app
 
 # Copy compiled binary to release image
-COPY --from=build /build/src/exporter /app/fail2ban-prometheus-exporter
+COPY --from=build /build/src/fail2ban_exporter /app/fail2ban_exporter
 
-ENTRYPOINT ["/app/fail2ban-prometheus-exporter"]
+ENTRYPOINT ["/app/fail2ban_exporter"]

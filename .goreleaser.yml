@@ -1,10 +1,12 @@
 # This is an example goreleaser.yaml file with some sane defaults.
 # Make sure to check the documentation at http://goreleaser.com
+project_name: fail2ban_exporter
 before:
   hooks:
     - make go/dependencies
 builds:
   -
+    binary: fail2ban_exporter
     dir: src
     goos:
       - linux
@@ -20,6 +22,7 @@ builds:
 
 archives:
   -
+    wrap_in_directory: true
     files:
     - LICENSE
     - README.md
