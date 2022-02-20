@@ -1,44 +1,118 @@
 # Fail2Ban Prometheus Exporter
 
-Go tool to collect and export metrics on Fail2Ban
+[![Pipeline](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/badges/main/pipeline.svg)](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter)
+
+Collect metrics from a running fail2ban instance.
 
 ## Table of Contents
-1. Introduction
-2. Running the Exporter
-3. Running in Docker
-4. Metrics
+1. Quick Start
+2. Metrics
+3. Configuration
+4. Building from source
+5. Textfile metrics
 
-## 1. Introduction
-This exporter collects metrics from a running fail2ban instance.
+## 1. Quick Start
 
-Once the exporter is running, metrics are available at `localhost:9191/metrics`.
+The exporter can be run as a standalone binary or a docker container.
 
-(The default port is `9191` but can be modified with the `--web.listen-address` flag)
+### 1.1. Standalone
 
-The exporter communicates with the fail2ban server over its socket.
-This allows the data collected by the exporter to always align with the output of the `fail2ban-client`.
+The following command will start collecting metrics from the `/var/run/fail2ban/fail2ban.sock` file and expose them on port `9191`.
 
-The default location of the socket is: `/var/run/fail2ban/fail2ban.sock`
+```
+$ fail2ban_exporter --collector.f2b.socket=/var/run/fail2ban/fail2ban.sock --web.listen-address=":9191"
 
-## 1.1. Grafana
+2022/02/20 09:54:06 fail2ban exporter version 0.5.0
+2022/02/20 09:54:06 starting server at :9191
+2022/02/20 09:54:06 reading metrics from fail2ban socket: /var/run/fail2ban/fail2ban.sock
+2022/02/20 09:54:06 metrics available at '/metrics'
+2022/02/20 09:54:06 ready
+```
 
-The metrics exported by this tool are compatible with Prometheus and Grafana. A sample grafana dashboard can be found in the `grafana.json` file. Just import the contents of this file into a new Grafana dashboard to get started.
+Binary files for each release can be found on the [releases](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/-/releases) page.
+
+### 1.2. Docker
+
+**Docker run**
+```
+docker run -d \
+    --name "fail2ban-exporter" \
+    -v /var/run/fail2ban:/var/run/fail2ban:ro \
+    -p "9191:9191" \
+    registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest
+```
+
+**Docker compose**
+
+```
+version: "2"
+services:
+  exporter:
+    image: registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest
+    volumes:
+    - /var/run/fail2ban/:/var/run/fail2ban:ro
+    ports:
+    - "9191:9191"
+```
+
+Use the `:latest` tag to get the latest stable release. Or use the `:nightly` tag for the latest (unstable) version.
+See the [registry page](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/container_registry) for all available tags.
+
+**NOTE:** While it is possible to mount the `fail2ban.sock` file directly, it is recommended to mount the parent folder instead.
+The `.sock` file is deleted by fail2ban on shutdown and re-created on startup and this causes problems for the docker mount.
+See [this reply](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/-/issues/11#note_665003499) for more details.
+
+## 2. Metrics
+
+The exporter exposes the following metrics:
+
+*All metric names are prefixed with `f2b_`*
+
+| Metric                       | Description                                                                        | Example                                             |
+|------------------------------|------------------------------------------------------------------------------------|-----------------------------------------------------|
+| `up`                         | Returns 1 if the exporter is up and running                                        | `f2b_up 1`                                          |
+| `errors`                     | Count the number of errors since startup by type                                   |                                                     |
+| `errors{type="socket_conn"}` | Errors connecting to the fail2ban socket (e.g. connection refused)                 | `f2b_errors{type="socket_conn"} 0`                  |
+| `errors{type="socket_req"}`  | Errors sending requests to the fail2ban server (e.g. invalid responses)            | `f2b_errors{type="socket_req"} 0`                   |
+| `jail_count`                 | Number of jails configured in fail2ban                                             | `f2b_jail_count 2`                                  |
+| `jail_banned_current`        | Number of IPs currently banned per jail                                            | `f2b_jail_banned_current{jail="sshd"} 15`           |
+| `jail_banned_total`          | Total number of banned IPs since fail2ban startup per jail (includes expired bans) | `f2b_jail_banned_total{jail="sshd"} 31`             |
+| `jail_failed_current`        | Number of current failures per jail                                                | `f2b_jail_failed_current{jail="sshd"} 6`            |
+| `jail_failed_total`          | Total number of failures since fail2ban startup per jail                           | `f2b_jail_failed_total{jail="sshd"} 125`            |
+| `jail_config_ban_time`       | How long an IP is banned for in this jail (in seconds)                             | `f2b_config_jail_ban_time{jail="sshd"} 600`         |
+| `jail_config_find_time`      | How far back the filter will look for failures in this jail (in seconds)           | `f2b_config_jail_find_time{jail="sshd"} 600`        |
+| `jail_config_max_retry`      | The max number of failures allowed before banning an IP in this jail               | `f2b_config_jail_max_retries{jail="sshd"} 5`        |
+| `version`                    | Version string of the exporter and fail2ban                                        | `f2b_version{exporter="0.5.0",fail2ban="0.11.1"} 1` |
+
+The metrics above correspond to the matching fields in the `fail2ban-client status <jail>` command:
+```
+Status for the jail: sshd
+|- Filter
+|  |- Currently failed: 6
+|  |- Total failed:     125
+|  `- File list:        /var/log/auth.log
+`- Actions
+   |- Currently banned: 15
+   |- Total banned:     31
+   `- Banned IP list:   ...
+```
+
+### 2.1. Grafana
+
+The metrics exported by this tool are compatible with Prometheus and Grafana.
+A sample grafana dashboard can be found in the [grafana.json](/examples/grafana/dashboard.json) file.
+Just import the contents of this file into a new Grafana dashboard to get started.
 
 *(Sample dashboard is compatible with Grafana `8.3.3` and above)*
 
-## 2. Running the Exporter
+## 3. Configuration
 
-The exporter is compiled and released as a single binary.
-This makes it very easy to run in any environment.
-No additional runtime dependencies are required.
+The exporter is configured with CLI flags and environment variables.
+There are no configuration files.
 
-Compiled binaries for various platforms are provided in each release.
-See the [releases page](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/-/releases) for more information.
-
-**CLI Usage**
+**CLI flags**
 ```
-$ fail2ban-prometheus-exporter -h
-usage: fail2ban-prometheus-exporter [<flags>]
+usage: fail2ban_exporter [<flags>]
 
 Flags:
   -h, --help     Show context-sensitive help (also try --help-long and --help-man).
@@ -57,175 +131,27 @@ Flags:
 
 **Environment variables**
 
-The tool can also be configured using environment variables. Each CLI parameter has a corresponding environment variable.
+Each environment variable corresponds to a CLI flag.
+If both are specified, the CLI flag takes precedence.
 
-```
-F2B_COLLECTOR_SOCKET
-F2B_COLLECTOR_TEXT_PATH
-F2B_WEB_LISTEN_ADDRESS
-F2B_WEB_BASICAUTH_USER
-F2B_WEB_BASICAUTH_PASS
-```
+| Environment variable      | Corresponding CLI flag           |
+|---------------------------|----------------------------------|
+| `F2B_COLLECTOR_SOCKET`    | `--collector.f2b.socket`         |
+| `F2B_COLLECTOR_TEXT_PATH` | `--collector.textfile.directory` |
+| `F2B_WEB_LISTEN_ADDRESS`  | `--web.listen-address`           |
+| `F2B_WEB_BASICAUTH_USER`  | `--web.basic-auth.username`      |
+| `F2B_WEB_BASICAUTH_PASS`  | `--web.basic-auth.password`      |
 
-**Example**
+## 4. Building from source
 
-```
-fail2ban-prometheus-exporter --collector.f2b.socket=/var/run/fail2ban/fail2ban.sock --web.listen-address=":9191"
-```
+The simplest way to build the project is to run the `build/snapshot` make command.
+This will use `goreleaser` to build out binaries and archives for the project.
+Binaries are stored in the `dist/` folder.
 
-Note that the exporter will need read access to the fail2ban socket.
+Alternatively, `go mod download` and `go build` can be used from the `src/` folder to build out the project.
+This will download dependencies and build the project.
 
-### 2.1. Compile from Source
-
-The code can be compiled from source by running `go build` inside the `src/` folder.
-Go version `1.15` or greater is required.
-
-Run `go mod download` to download all necessary dependencies before running the build.
-
-## 3. Running in Docker
-
-An official docker image is available on the Gitlab container registry.
-Use it by pulling the following image:
-
-```
-registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest
-```
-
-Use the `:latest` tag to get the latest stable release. Or use the `:nightly` tag for the latest (unstable) version.
-See the [registry page](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/container_registry) for all available tags.
-
-### 3.1. Volumes
-
-The docker image is designed to run by mounting the fail2ban run folder.
-The run folder should be mounted in the container at: `/var/run/fail2ban`.
-
-The folder can be mounted with read-only (`ro`) permissions.
-
-**NOTE:** While it is possible to mount the `fail2ban.sock` file directly, it is recommended to mount the parent folder instead.
-The `.sock` file is deleted by fail2ban on shutdown and re-created on startup and this causes problems for the docker mount.
-See [this reply](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/-/issues/11#note_665003499) for more details.
-
-### 3.2. Docker run
-
-Use the following command to run the exporter as a docker container.
-
-```
-docker run -d \
-    --name "fail2ban-exporter" \
-    -v /var/run/fail2ban:/var/run/fail2ban:ro \
-    -p "9191:9191" \
-    registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest
-```
-
-### 3.3. Docker compose
-
-The following is a simple docker-compose file to run the exporter.
-
-```
-version: "2"
-services:
-  exporter:
-    image: registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest
-    volumes:
-    - /var/run/fail2ban/:/var/run/fail2ban:ro
-    ports:
-    - "9191:9191"
-```
-
-## 4. Metrics
-
-Access exported metrics at the `/metrics` path on the configured port.
-
-**Note on Fail2Ban Jails**
-
-fail2ban can be configured to process different log files and use different rules for each one.
-These separate configurations are referred to as *jails*.
-
-For example, fail2ban can be configured to watch the system logs for failed SSH connections and Nextcloud logs for failed logins.
-In this configuration, there will be two jails - one for IPs banned from the SSH logs, and one for IPs banned from the Nextcloud logs.
-
-This tool exports several metrics *per jail*, meaning that it is possible to track how many IPs are being banned in each jail as well as the overall total.
-This can be useful to track what services are seeing more failed logins.
-
-### 4.1. Fail2Ban Metrics
-
-These are the metrics exported by reading data from the fail2ban server socket.
-All metrics are prefixed with `f2b_`.
-
-Exposed metrics:
-* `up` - Returns 1 if the fail2ban server is up and connection succeeds
-* `errors` - Number of errors since startup
-    * `socket_conn` - Errors connecting to the fail2ban socket (e.g. connection refused)
-    * `socket_req` - Errors sending requests to the fail2ban server (e.g. invalid responses)
-* `jail_count` - Number of jails configured in fail2ban
-* `jail_banned_current` (per jail) - Number of IPs currently banned
-* `jail_banned_total` (per jail) - Total number of banned IPs since fail2ban startup (includes expired bans)
-* `jail_failed_current` (per jail) - Number of current failures
-* `jail_failed_total` (per jail) - Total number of failures since fail2ban startup
-* `jail_config_ban_time` (per jail) - How long an IP is banned for in this jail (in seconds)
-* `jail_config_find_time` (per jail) - How far back the filter will look for failures in this jail (in seconds)
-* `jail_config_max_retry` (per jail) - The max number of failures allowed before banning an IP in this jail
-* `version` - Version string of the exporter and fail2ban
-
-**Sample**
-
-```
-# HELP f2b_errors Number of errors found since startup
-# TYPE f2b_errors counter
-f2b_errors{type="socket_conn"} 0
-f2b_errors{type="socket_req"} 0
-# HELP f2b_jail_banned_current Number of IPs currently banned in this jail
-# TYPE f2b_jail_banned_current gauge
-f2b_jail_banned_current{jail="recidive"} 5
-f2b_jail_banned_current{jail="sshd"} 15
-# HELP f2b_jail_banned_total Total number of IPs banned by this jail (includes expired bans)
-# TYPE f2b_jail_banned_total gauge
-f2b_jail_banned_total{jail="recidive"} 6
-f2b_jail_banned_total{jail="sshd"} 31
-# HELP f2b_jail_count Number of defined jails
-# TYPE f2b_jail_count gauge
-f2b_jail_count 2
-# HELP f2b_jail_failed_current Number of current failures on this jail's filter
-# TYPE f2b_jail_failed_current gauge
-f2b_jail_failed_current{jail="recidive"} 5
-f2b_jail_failed_current{jail="sshd"} 6
-# HELP f2b_jail_failed_total Number of total failures on this jail's filter
-# TYPE f2b_jail_failed_total gauge
-f2b_jail_failed_total{jail="recidive"} 7
-f2b_jail_failed_total{jail="sshd"} 125
-# HELP f2b_config_jail_ban_time How long an IP is banned for in this jail (in seconds)
-# TYPE f2b_config_jail_ban_time gauge
-f2b_config_jail_ban_time{jail="recidive"} 604800
-f2b_config_jail_ban_time{jail="sshd"} 600
-# HELP f2b_config_jail_find_time How far back will the filter look for failures in this jail (in seconds)
-# TYPE f2b_config_jail_find_time gauge
-f2b_config_jail_find_time{jail="recidive"} 86400
-f2b_config_jail_find_time{jail="sshd"} 600
-# HELP f2b_config_jail_max_retries The number of failures allowed until the IP is banned by this jail
-# TYPE f2b_config_jail_max_retries gauge
-f2b_config_jail_max_retries{jail="recidive"} 5
-f2b_config_jail_max_retries{jail="sshd"} 5
-# HELP f2b_up Check if the fail2ban server is up
-# TYPE f2b_up gauge
-f2b_up 1
-# HELP f2b_version Version of the exporter and fail2ban server
-# TYPE f2b_version gauge
-f2b_version{exporter="0.3.0",fail2ban="0.11.1"} 1
-```
-
-The metrics above correspond to the matching fields in the `fail2ban-client status <jail>` command:
-```
-Status for the jail: sshd|- Filter
-|  |- Currently failed: 6
-|  |- Total failed:     125
-|  `- File list:        /var/log/auth.log
-`- Actions
-   |- Currently banned: 15
-   |- Total banned:     31
-   `- Banned IP list:   ...
-```
-
-### 4.2. Textfile Metrics
+## 5. Textfile metrics
 
 For more flexibility the exporter also allows exporting metrics collected from a text file.
 

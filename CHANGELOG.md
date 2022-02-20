@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 ## [Unreleased]
 
 ### Added
+- (23e073f) feat: add example systemd service file
+- (3911eca) feat: rename output binary and archives
+- (f6e328a) feat: correctly handle shutdown signals
 - (6e575aa) feat: rewrite cli flags and environment variables
 - (0f0efe5) feat: remove startup script from docker image
 - (e2902b8) feat: improve logging on startup
@@ -18,6 +21,7 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 - (93da909) fix: use correct flag in dockerfile ([#18](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/issues/18))
 
 ### BREAKING CHANGE
+- Release binary name has been changed to `fail2ban_exporter`.
 - Replace `--socket` flag with `--collector.f2b.socket`.
 - Merge `--port` flag and `--web.listen-address` into a single flag.
 - Remove `--collector.textfile` flag, its value is now derived from `--collector.textfile.directory`.
