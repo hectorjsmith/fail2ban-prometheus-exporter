@@ -1,9 +1,9 @@
 package f2b
 
 import (
-	"fail2ban-prometheus-exporter/cfg"
-	"fail2ban-prometheus-exporter/socket"
 	"github.com/prometheus/client_golang/prometheus"
+	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/cfg"
+	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/socket"
 	"log"
 )
 
