@@ -1,13 +1,13 @@
 package main
 
 import (
-	"fail2ban-prometheus-exporter/auth"
-	"fail2ban-prometheus-exporter/cfg"
-	"fail2ban-prometheus-exporter/collector/f2b"
-	"fail2ban-prometheus-exporter/collector/textfile"
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/auth"
+	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/cfg"
+	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/collector/f2b"
+	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/collector/textfile"
 	"log"
 	"net/http"
 	"os"

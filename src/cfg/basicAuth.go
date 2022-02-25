@@ -1,6 +1,6 @@
 package cfg
 
-import "fail2ban-prometheus-exporter/auth"
+import "gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/auth"
 
 type hashedBasicAuth struct {
 	username string

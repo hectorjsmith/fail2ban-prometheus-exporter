@@ -1,8 +1,8 @@
 package textfile
 
 import (
-	"fail2ban-prometheus-exporter/cfg"
 	"github.com/prometheus/client_golang/prometheus"
+	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/cfg"
 	"log"
 )
 
