@@ -112,7 +112,7 @@ There are no configuration files.
 
 **CLI flags**
 ```
-usage: fail2ban_exporter [<flags>]
+usage: exporter [<flags>]
 
 Flags:
   -h, --help     Show context-sensitive help (also try --help-long and --help-man).
@@ -127,6 +127,8 @@ Flags:
                  username to use to protect endpoints with basic auth
       --web.basic-auth.password=""  
                  password to use to protect endpoints with basic auth
+      --collector.f2b.exit-on-socket-connection-error  
+                 when set to true the exporter will immediately exit on a fail2ban socket connection error
 ```
 
 **Environment variables**
@@ -134,13 +136,14 @@ Flags:
 Each environment variable corresponds to a CLI flag.
 If both are specified, the CLI flag takes precedence.
 
-| Environment variable      | Corresponding CLI flag           |
-|---------------------------|----------------------------------|
-| `F2B_COLLECTOR_SOCKET`    | `--collector.f2b.socket`         |
-| `F2B_COLLECTOR_TEXT_PATH` | `--collector.textfile.directory` |
-| `F2B_WEB_LISTEN_ADDRESS`  | `--web.listen-address`           |
-| `F2B_WEB_BASICAUTH_USER`  | `--web.basic-auth.username`      |
-| `F2B_WEB_BASICAUTH_PASS`  | `--web.basic-auth.password`      |
+| Environment variable            | Corresponding CLI flag                            |
+|---------------------------------|---------------------------------------------------|
+| `F2B_COLLECTOR_SOCKET`          | `--collector.f2b.socket`                          |
+| `F2B_COLLECTOR_TEXT_PATH`       | `--collector.textfile.directory`                  |
+| `F2B_WEB_LISTEN_ADDRESS`        | `--web.listen-address`                            |
+| `F2B_WEB_BASICAUTH_USER`        | `--web.basic-auth.username`                       |
+| `F2B_WEB_BASICAUTH_PASS`        | `--web.basic-auth.password`                       |
+| `F2B_EXIT_ON_SOCKET_CONN_ERROR` | `--collector.f2b.exit-on-socket-connection-error` |
 
 ## 4. Building from source
 

@@ -5,6 +5,7 @@ import (
 	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/cfg"
 	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/socket"
 	"log"
+	"os"
 )
 
 type Collector struct {
@@ -13,6 +14,7 @@ type Collector struct {
 	lastError                  error
 	socketConnectionErrorCount int
 	socketRequestErrorCount    int
+	exitOnSocketConnError      bool
 }
 
 func NewExporter(appSettings *cfg.AppSettings, exporterVersion string) *Collector {
@@ -23,6 +25,7 @@ func NewExporter(appSettings *cfg.AppSettings, exporterVersion string) *Collecto
 		lastError:                  nil,
 		socketConnectionErrorCount: 0,
 		socketRequestErrorCount:    0,
+		exitOnSocketConnError:      appSettings.ExitOnSocketConnError,
 	}
 }
 
@@ -41,6 +44,9 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	if err != nil {
 		log.Printf("error opening socket: %v", err)
 		c.socketConnectionErrorCount++
+		if c.exitOnSocketConnError {
+			os.Exit(1)
+		}
 	} else {
 		defer s.Close()
 	}
