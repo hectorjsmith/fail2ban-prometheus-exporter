@@ -7,19 +7,21 @@ import (
 )
 
 const (
-	socketEnvName            = "F2B_COLLECTOR_SOCKET"
-	fileCollectorPathEnvName = "F2B_COLLECTOR_TEXT_PATH"
-	addressEnvName           = "F2B_WEB_LISTEN_ADDRESS"
-	basicAuthUserEnvName     = "F2B_WEB_BASICAUTH_USER"
-	basicAuthPassEnvName     = "F2B_WEB_BASICAUTH_PASS"
+	socketEnvName                = "F2B_COLLECTOR_SOCKET"
+	fileCollectorPathEnvName     = "F2B_COLLECTOR_TEXT_PATH"
+	addressEnvName               = "F2B_WEB_LISTEN_ADDRESS"
+	basicAuthUserEnvName         = "F2B_WEB_BASICAUTH_USER"
+	basicAuthPassEnvName         = "F2B_WEB_BASICAUTH_PASS"
+	exitOnSocketConnErrorEnvName = "F2B_EXIT_ON_SOCKET_ERROR"
 )
 
 type AppSettings struct {
-	VersionMode        bool
-	MetricsAddress     string
-	Fail2BanSocketPath string
-	FileCollectorPath  string
-	BasicAuthProvider  *hashedBasicAuth
+	VersionMode           bool
+	MetricsAddress        string
+	Fail2BanSocketPath    string
+	FileCollectorPath     string
+	BasicAuthProvider     *hashedBasicAuth
+	ExitOnSocketConnError bool
 }
 
 func init() {
@@ -64,6 +66,11 @@ func readParamsFromCli(settings *AppSettings) {
 		Default("").
 		Envar(basicAuthPassEnvName).
 		String()
+	rawExitOnSocketConnError := kingpin.
+		Flag("collector.f2b.exit-on-socket-connection-error", "when set to true the exporter will immediately exit on a fail2ban socket connection error").
+		Default("false").
+		Envar(exitOnSocketConnErrorEnvName).
+		Bool()
 
 	kingpin.Parse()
 
@@ -72,6 +79,7 @@ func readParamsFromCli(settings *AppSettings) {
 	settings.Fail2BanSocketPath = *socketPath
 	settings.FileCollectorPath = *fileCollectorPath
 	settings.setBasicAuthValues(*rawBasicAuthUsername, *rawBasicAuthPassword)
+	settings.ExitOnSocketConnError = *rawExitOnSocketConnError
 }
 
 func (settings *AppSettings) setBasicAuthValues(rawUsername, rawPassword string) {
