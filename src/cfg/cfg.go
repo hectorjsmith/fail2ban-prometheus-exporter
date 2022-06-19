@@ -12,7 +12,7 @@ const (
 	addressEnvName               = "F2B_WEB_LISTEN_ADDRESS"
 	basicAuthUserEnvName         = "F2B_WEB_BASICAUTH_USER"
 	basicAuthPassEnvName         = "F2B_WEB_BASICAUTH_PASS"
-	exitOnSocketConnErrorEnvName = "F2B_EXIT_ON_SOCKET_ERROR"
+	exitOnSocketConnErrorEnvName = "F2B_EXIT_ON_SOCKET_CONN_ERROR"
 )
 
 type AppSettings struct {

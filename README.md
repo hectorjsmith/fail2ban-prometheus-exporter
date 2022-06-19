@@ -136,14 +136,14 @@ Flags:
 Each environment variable corresponds to a CLI flag.
 If both are specified, the CLI flag takes precedence.
 
-| Environment variable       | Corresponding CLI flag                            |
-|----------------------------|---------------------------------------------------|
-| `F2B_COLLECTOR_SOCKET`     | `--collector.f2b.socket`                          |
-| `F2B_COLLECTOR_TEXT_PATH`  | `--collector.textfile.directory`                  |
-| `F2B_WEB_LISTEN_ADDRESS`   | `--web.listen-address`                            |
-| `F2B_WEB_BASICAUTH_USER`   | `--web.basic-auth.username`                       |
-| `F2B_WEB_BASICAUTH_PASS`   | `--web.basic-auth.password`                       |
-| `F2B_EXIT_ON_SOCKET_ERROR` | `--collector.f2b.exit-on-socket-connection-error` |
+| Environment variable            | Corresponding CLI flag                            |
+|---------------------------------|---------------------------------------------------|
+| `F2B_COLLECTOR_SOCKET`          | `--collector.f2b.socket`                          |
+| `F2B_COLLECTOR_TEXT_PATH`       | `--collector.textfile.directory`                  |
+| `F2B_WEB_LISTEN_ADDRESS`        | `--web.listen-address`                            |
+| `F2B_WEB_BASICAUTH_USER`        | `--web.basic-auth.username`                       |
+| `F2B_WEB_BASICAUTH_PASS`        | `--web.basic-auth.password`                       |
+| `F2B_EXIT_ON_SOCKET_CONN_ERROR` | `--collector.f2b.exit-on-socket-connection-error` |
 
 ## 4. Building from source
 
