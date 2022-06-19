@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 ## [Unreleased]
 *Nothing yet*
 
+## [0.7.0] - 2022-06-19
+
+### Added
+- (fd58b20) feat: option to exit on socket conn error ([#21](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/issues/21))
+
 ## [0.6.0] - 2022-02-20
 *Rewrite CLI flags and environment variables*
 
@@ -105,10 +110,11 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
-[Unreleased]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.1.0...main
+[Unreleased]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.7.0...main
 [0.1.0]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.0.0...0.1.0
 [0.2.0]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.1.0...0.2.0
 [0.3.0]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.2.0...0.3.0
 [0.4.0]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.3.0...0.4.0
 [0.5.0]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.4.0...0.5.0
 [0.6.0]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.5.0...0.6.0
+[0.7.0]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.6.0...0.7.0
