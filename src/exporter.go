@@ -85,7 +85,7 @@ func main() {
 		log.Print("ready")
 
 		err := <-svrErr
-		log.Print(err)
+		log.Fatal(err)
 	}
 }
 
