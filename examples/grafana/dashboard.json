@@ -9,13 +9,13 @@
       "pluginName": "Prometheus"
     }
   ],
-  "__elements": [],
+  "__elements": {},
   "__requires": [
     {
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "8.3.3"
+      "version": "9.1.8"
     },
     {
       "type": "datasource",
@@ -40,7 +40,10 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": "-- Grafana --",
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -59,7 +62,6 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 2,
   "id": null,
-  "iteration": 1640159475017,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -76,7 +78,8 @@
           },
           "custom": {
             "align": "auto",
-            "displayMode": "auto"
+            "displayMode": "auto",
+            "inspect": false
           },
           "mappings": [],
           "thresholds": {
@@ -121,15 +124,16 @@
         },
         "showHeader": true
       },
-      "pluginVersion": "8.3.3",
+      "pluginVersion": "9.1.8",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "exemplar": false,
-          "expr": "f2b_config_jail_max_retries",
+          "expr": "f2b_config_jail_max_retries{instance=~\"$instance\"}",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -141,8 +145,9 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "exemplar": false,
-          "expr": "f2b_config_jail_ban_time",
+          "expr": "f2b_config_jail_ban_time{instance=~\"$instance\"}",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -155,8 +160,9 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "exemplar": false,
-          "expr": "f2b_config_jail_find_time",
+          "expr": "f2b_config_jail_find_time{instance=~\"$instance\"}",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -192,6 +198,10 @@
                   "lastNotNull"
                 ],
                 "operation": "aggregate"
+              },
+              "instance": {
+                "aggregations": [],
+                "operation": "groupby"
               },
               "jail": {
                 "aggregations": [],
@@ -229,6 +239,8 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
@@ -284,10 +296,12 @@
             "lastNotNull"
           ],
           "displayMode": "table",
-          "placement": "right"
+          "placement": "right",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "pluginVersion": "8.2.1",
@@ -297,11 +311,13 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "f2b_jail_failed_total",
+          "expr": "f2b_jail_failed_total{instance=~\"$instance\"}",
           "hide": false,
           "interval": "",
-          "legendFormat": "{{jail}}",
+          "legendFormat": "{{jail}} ({{instance}})",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -321,6 +337,8 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
@@ -376,10 +394,12 @@
             "lastNotNull"
           ],
           "displayMode": "table",
-          "placement": "right"
+          "placement": "right",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "pluginVersion": "8.2.1",
@@ -389,10 +409,12 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "f2b_jail_banned_total",
+          "expr": "f2b_jail_banned_total{instance=~\"$instance\"}",
           "interval": "",
-          "legendFormat": "{{jail}}",
+          "legendFormat": "{{jail}} ({{instance}})",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -412,6 +434,8 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
@@ -467,10 +491,12 @@
             "lastNotNull"
           ],
           "displayMode": "table",
-          "placement": "right"
+          "placement": "right",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "pluginVersion": "8.2.1",
@@ -480,10 +506,12 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "f2b_jail_failed_current",
+          "expr": "f2b_jail_failed_current{instance=~\"$instance\"}",
           "interval": "",
-          "legendFormat": "{{jail}}",
+          "legendFormat": "{{jail}} ({{instance}})",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -503,6 +531,8 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
@@ -558,10 +588,12 @@
             "lastNotNull"
           ],
           "displayMode": "table",
-          "placement": "right"
+          "placement": "right",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "pluginVersion": "8.2.1",
@@ -571,10 +603,12 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "f2b_jail_banned_current",
+          "expr": "f2b_jail_banned_current{instance=~\"$instance\"}",
           "interval": "",
-          "legendFormat": "{{jail}}",
+          "legendFormat": "{{jail}} ({{instance}})",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -594,6 +628,8 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
@@ -650,10 +686,12 @@
             "lastNotNull"
           ],
           "displayMode": "table",
-          "placement": "right"
+          "placement": "right",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "pluginVersion": "8.2.1",
@@ -663,10 +701,12 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "f2b_up",
+          "expr": "f2b_up{instance=~\"$instance\"}",
           "interval": "",
-          "legendFormat": "Up",
+          "legendFormat": "Up ({{instance}})",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -686,6 +726,8 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
@@ -742,10 +784,12 @@
             "lastNotNull"
           ],
           "displayMode": "table",
-          "placement": "right"
+          "placement": "right",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "pluginVersion": "8.2.1",
@@ -755,10 +799,12 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "f2b_errors",
+          "expr": "f2b_errors{instance=~\"$instance\"}",
           "interval": "",
-          "legendFormat": "{{type}}",
+          "legendFormat": "{{type}} ({{instance}})",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -768,14 +814,14 @@
     }
   ],
   "refresh": "30s",
-  "schemaVersion": 34,
+  "schemaVersion": 37,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": [
       {
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "Prometheus",
           "value": "Prometheus"
         },
@@ -791,6 +837,30 @@
         "regex": "",
         "skipUrlSync": false,
         "type": "datasource"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "f2b_up",
+        "description": "Select which instance(s) to show",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Instance",
+        "multi": true,
+        "name": "instance",
+        "options": [],
+        "query": {
+          "query": "f2b_up",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/.*instance=\"([^\"]+)\"/",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
       }
     ]
   },
@@ -802,6 +872,6 @@
   "timezone": "",
   "title": "F2B",
   "uid": "cTkH9AT7z",
-  "version": 17,
+  "version": 3,
   "weekStart": ""
 }
