@@ -103,7 +103,9 @@ The metrics exported by this tool are compatible with Prometheus and Grafana.
 A sample grafana dashboard can be found in the [grafana.json](/examples/grafana/dashboard.json) file.
 Just import the contents of this file into a new Grafana dashboard to get started.
 
-*(Sample dashboard is compatible with Grafana `8.3.3` and above)*
+The dashboard supports displaying data from multiple exporters. Use the `instance` dashboard variable to select which ones to display.
+
+*(Sample dashboard is compatible with Grafana `9.1.8` and above)*
 
 ## 3. Configuration
 
