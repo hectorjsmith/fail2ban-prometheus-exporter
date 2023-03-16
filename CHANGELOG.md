@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 ## [Unreleased]
 *Nothing yet*
 
+## [0.7.2] - 2023-03-16
+*Dependency updates*
+
 ## [0.7.1] - 2022-09-18
 
 ### Fixed
@@ -124,3 +127,4 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 [0.6.0]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.5.0...0.6.0
 [0.7.0]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.6.0...0.7.0
 [0.7.1]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.7.0...0.7.1
+[0.7.2]: https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/compare/0.7.1...0.7.2
