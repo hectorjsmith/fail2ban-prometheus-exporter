@@ -2,37 +2,39 @@ stages:
   - test
   - build
 
-.go_template:
-  image: golang:latest
-  before_script:
-    - make go/dependencies
+# .go_template:
+#   image: golang:latest
+#   before_script:
+#     - make download
 
-.docker_template:
-  image: docker:stable
-  services:
-    - docker:dind
-  before_script:
-    - apk add git
-    - apk add make
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+# .docker_template:
+#   image: docker:stable
+#   services:
+#     - docker:dind
+#   before_script:
+#     - apk add git
+#     - apk add make
+#     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
 
 dependencies:
-  extends: .go_template
   stage: test
   script:
-    - make go/checkDependencies
+    - make check/dependencies
 
 format:
-  extends: .go_template
   stage: test
   script:
-    - make go/checkFmt
+    - make check/fmt
 
 test:
-  extends: .go_template
   stage: test
   script:
-    - make go/test
+    - make test
+
+build:
+  stage: build
+  script:
+    - make build
 
 # build:
 #   extends: .go_template
@@ -49,21 +51,21 @@ test:
 #       - dist/checksums.txt
 #     expire_in: 1 day
 
-docker/gitlab:
-  extends: .docker_template
-  stage: build
-  only:
-    - tags
-  script:
-    - make docker/build/latest
-    - make docker/build/tag
-    - docker push registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter
+# docker/gitlab:
+#   extends: .docker_template
+#   stage: build
+#   only:
+#     - tags
+#   script:
+#     - make docker/build/latest
+#     - make docker/build/tag
+#     - docker push registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter
 
-docker/gitlab/nightly:
-  extends: .docker_template
-  stage: build
-  only:
-    - main
-  script:
-    - make docker/build/nightly
-    - docker push registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter
+# docker/gitlab/nightly:
+#   extends: .docker_template
+#   stage: build
+#   only:
+#     - main
+#   script:
+#     - make docker/build/nightly
+#     - docker push registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter
