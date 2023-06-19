@@ -24,3 +24,6 @@ build:
 	" \
 	-o fail2ban_exporter \
 	exporter.go
+
+build/docker: build
+	docker build -t fail2ban-prometheus-exporter .
