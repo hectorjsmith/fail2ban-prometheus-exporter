@@ -1,3 +1,5 @@
+.PHONY: download test fmt check/dependencies check/fmt build build/docker
+
 download:
 	go mod download
 
@@ -24,3 +26,6 @@ build:
 	" \
 	-o fail2ban_exporter \
 	exporter.go
+
+build/docker: build
+	docker build -t fail2ban-prometheus-exporter .
