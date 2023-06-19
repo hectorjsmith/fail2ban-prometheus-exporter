@@ -1,3 +1,5 @@
+.PHONY: download test fmt check/dependencies check/fmt build build/docker
+
 download:
 	go mod download
 
