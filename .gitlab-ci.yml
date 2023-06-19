@@ -1,18 +1,10 @@
 stages:
   - test
   - build
+  - release
 
 .go_template:
   image: golang:latest
-
-# .docker_template:
-#   image: docker:stable
-#   services:
-#     - docker:dind
-#   before_script:
-#     - apk add git
-#     - apk add make
-#     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
 
 dependencies:
   extends: .go_template
@@ -42,36 +34,25 @@ build:
       - fail2ban_exporter
     expire_in: 1 day
 
-# build:
-#   extends: .go_template
-#   stage: build
-#   only:
-#     - main
-#     - tags
-#   script:
-#     - git fetch --tags
-#     - make build/snapshot
-#   artifacts:
-#     paths:
-#       - dist/*.tar.gz
-#       - dist/checksums.txt
-#     expire_in: 1 day
-
-# docker/gitlab:
-#   extends: .docker_template
-#   stage: build
-#   only:
-#     - tags
-#   script:
-#     - make docker/build/latest
-#     - make docker/build/tag
-#     - docker push registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter
-
-# docker/gitlab/nightly:
-#   extends: .docker_template
-#   stage: build
-#   only:
-#     - main
-#   script:
-#     - make docker/build/nightly
-#     - docker push registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter
+release:
+  stage: release
+  image: docker:stable
+  services:
+    - docker:dind
+  variables:
+    DOCKER_REGISTRY: $CI_REGISTRY
+    DOCKER_USERNAME: $CI_REGISTRY_USER
+    DOCKER_PASSWORD: $CI_REGISTRY_PASSWORD
+    GIT_DEPTH: 0
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v.*$/
+  script: |
+    # GITLAB_TOKEN is needed to create GitLab releases.
+    # DOCKER_* are needed to push Docker images.
+    docker run --rm --privileged \
+      -v $PWD:/go/src/gitlab.com/hectorjsmith/fail2ban-prometheus-exporter \
+      -w /go/src/gitlab.com/hectorjsmith/fail2ban-prometheus-exporter \
+      -v /var/run/docker.sock:/var/run/docker.sock \
+      -e DOCKER_USERNAME -e DOCKER_PASSWORD -e DOCKER_REGISTRY  \
+      -e GITLAB_TOKEN \
+      goreleaser/goreleaser release --clean
