@@ -1,13 +1,7 @@
-# This is an example goreleaser.yaml file with some sane defaults.
-# Make sure to check the documentation at http://goreleaser.com
 project_name: fail2ban_exporter
-before:
-  hooks:
-    - make go/dependencies
 builds:
   -
     binary: fail2ban_exporter
-    dir: src
     goos:
       - linux
       - darwin
@@ -20,14 +14,32 @@ builds:
       - "6"
       - "7"
 
-archives:
-  -
-    wrap_in_directory: true
-    files:
-    - LICENSE
-    - README.md
-    - CHANGELOG.md
-checksum:
-  name_template: 'checksums.txt'
+dockers:
+- image_templates: ["registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:{{ .Version }}"]
+  dockerfile: Dockerfile
+  build_flag_templates:
+  - --label=org.opencontainers.image.title={{ .ProjectName }}
+  - --label=org.opencontainers.image.description={{ .ProjectName }}
+  - --label=org.opencontainers.image.url=https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter
+  - --label=org.opencontainers.image.source=https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter
+  - --label=org.opencontainers.image.version={{ .Version }}
+  - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
+  - --label=org.opencontainers.image.revision={{ .FullCommit }}
+  - --label=org.opencontainers.image.licenses=MIT
+
 changelog:
-  skip: true
+  groups:
+    - title: "⛔ Breaking Changes"
+      regexp: '^.*?!:.+$'
+      order: 0
+    - title: "🎉 Features"
+      regexp: '^.*?feat(\(\w+\))??:.+$'
+      order: 1
+    - title: "🐛 Fixes"
+      regexp: '^.*?fix(\(\w+\))??:.+$'
+      order: 2
+    - title: "📑 Other"
+      order: 999
+  filters:
+    exclude:
+      - "^Merge"
