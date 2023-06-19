@@ -1,6 +1,6 @@
 project_name: fail2ban_exporter
 builds:
-  -
+  - env: [CGO_ENABLED=0]
     binary: fail2ban_exporter
     goos:
       - linux
