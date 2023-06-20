@@ -67,17 +67,14 @@ func main() {
 		textFileCollector := textfile.NewCollector(appSettings)
 		prometheus.MustRegister(textFileCollector)
 
-		http.HandleFunc("/", server.BasicAuthMiddleware(rootHtmlHandler, appSettings.BasicAuthProvider))
+		http.HandleFunc("/", server.BasicAuthMiddleware(rootHtmlHandler, appSettings.AuthProvider))
 		http.HandleFunc(metricsPath, server.BasicAuthMiddleware(
 			func(w http.ResponseWriter, r *http.Request) {
 				metricHandler(w, r, textFileCollector)
 			},
-			appSettings.BasicAuthProvider,
+			appSettings.AuthProvider,
 		))
 		log.Printf("metrics available at '%s'", metricsPath)
-		if appSettings.BasicAuthProvider.Enabled() {
-			log.Printf("basic auth enabled")
-		}
 
 		svrErr := make(chan error)
 		go func() {

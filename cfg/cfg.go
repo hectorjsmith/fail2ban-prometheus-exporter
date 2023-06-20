@@ -2,9 +2,11 @@ package cfg
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/alecthomas/kong"
+	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/auth"
 )
 
 var cliStruct struct {
@@ -36,9 +38,20 @@ func Parse() *AppSettings {
 		Fail2BanSocketPath:    cliStruct.F2bSocketPath,
 		FileCollectorPath:     cliStruct.TextFileExporterPath,
 		ExitOnSocketConnError: cliStruct.ExitOnSocketError,
-		BasicAuthProvider:     newHashedBasicAuth(cliStruct.BasicAuthUser, cliStruct.BasicAuthPass),
+		AuthProvider:          createAuthProvider(),
 	}
 	return settings
+}
+
+func createAuthProvider() auth.AuthProvider {
+	username := cliStruct.BasicAuthUser
+	password := cliStruct.BasicAuthPass
+
+	if len(username) == 0 && len(password) == 0 {
+		return auth.NewEmptyAuthProvider()
+	}
+	log.Print("basic auth enabled")
+	return auth.NewBasicAuthProvider(username, password)
 }
 
 func validateFlags(cliCtx *kong.Context) {

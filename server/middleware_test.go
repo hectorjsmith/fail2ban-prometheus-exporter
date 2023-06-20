@@ -7,15 +7,10 @@ import (
 )
 
 type testAuthProvider struct {
-	enabled bool
-	match   bool
+	match bool
 }
 
-func (p testAuthProvider) Enabled() bool {
-	return p.enabled
-}
-
-func (p testAuthProvider) DoesBasicAuthMatch(username, password string) bool {
+func (p testAuthProvider) IsAllowed(request *http.Request) bool {
 	return p.match
 }
 
@@ -23,18 +18,15 @@ func newTestRequest() *http.Request {
 	return httptest.NewRequest(http.MethodGet, "http://example.com", nil)
 }
 
-func executeBasicAuthMiddlewareTest(t *testing.T, authEnabled bool, authMatches bool, expectedCode int, expectedCallCount int) {
+func executeBasicAuthMiddlewareTest(t *testing.T, authMatches bool, expectedCode int, expectedCallCount int) {
 	callCount := 0
 	testHandler := func(w http.ResponseWriter, r *http.Request) {
 		callCount++
 	}
 
-	handler := BasicAuthMiddleware(testHandler, testAuthProvider{enabled: authEnabled, match: authMatches})
+	handler := BasicAuthMiddleware(testHandler, testAuthProvider{match: authMatches})
 	recorder := httptest.NewRecorder()
 	request := newTestRequest()
-	if authEnabled {
-		request.SetBasicAuth("test", "test")
-	}
 	handler.ServeHTTP(recorder, request)
 
 	if recorder.Code != expectedCode {
@@ -45,14 +37,10 @@ func executeBasicAuthMiddlewareTest(t *testing.T, authEnabled bool, authMatches 
 	}
 }
 
-func Test_GIVEN_DisabledBasicAuth_WHEN_MethodCalled_THEN_RequestProcessed(t *testing.T) {
-	executeBasicAuthMiddlewareTest(t, false, false, http.StatusOK, 1)
+func Test_GIVEN_MatchingBasicAuth_WHEN_MethodCalled_THEN_RequestProcessed(t *testing.T) {
+	executeBasicAuthMiddlewareTest(t, true, http.StatusOK, 1)
 }
 
-func Test_GIVEN_EnabledBasicAuth_WHEN_MethodCalledWithCorrectCredentials_THEN_RequestProcessed(t *testing.T) {
-	executeBasicAuthMiddlewareTest(t, true, true, http.StatusOK, 1)
-}
-
-func Test_GIVEN_EnabledBasicAuth_WHEN_MethodCalledWithIncorrectCredentials_THEN_RequestRejected(t *testing.T) {
-	executeBasicAuthMiddlewareTest(t, true, false, http.StatusUnauthorized, 0)
+func Test_GIVEN_NonMatchingBasicAuth_WHEN_MethodCalled_THEN_RequestRejected(t *testing.T) {
+	executeBasicAuthMiddlewareTest(t, false, http.StatusUnauthorized, 0)
 }
