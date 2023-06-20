@@ -46,13 +46,25 @@ release:
     GIT_DEPTH: 0
   rules:
     - if: $CI_COMMIT_TAG =~ /^v.*$/
-  script: |
-    # GITLAB_TOKEN is needed to create GitLab releases.
-    # DOCKER_* are needed to push Docker images.
-    docker run --rm --privileged \
+  script:
+    - docker run --rm --privileged \
       -v $PWD:/go/src/gitlab.com/hectorjsmith/fail2ban-prometheus-exporter \
       -w /go/src/gitlab.com/hectorjsmith/fail2ban-prometheus-exporter \
       -v /var/run/docker.sock:/var/run/docker.sock \
       -e DOCKER_USERNAME -e DOCKER_PASSWORD -e DOCKER_REGISTRY  \
       -e GITLAB_TOKEN \
       goreleaser/goreleaser release --clean
+
+tag images:
+  stage: release
+  image: docker:stable
+  services:
+    - docker:dind
+  needs:
+    - release
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+  variables:
+    IMAGE_NAME: registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter
+  script:
+    - ./.gitlab-ci/tagLatestImage.sh
