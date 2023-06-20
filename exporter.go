@@ -2,17 +2,18 @@ package main
 
 import (
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/auth"
-	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/cfg"
-	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/collector/f2b"
-	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/collector/textfile"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/cfg"
+	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/collector/f2b"
+	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/collector/textfile"
+	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/server"
 )
 
 const (
@@ -66,8 +67,8 @@ func main() {
 		textFileCollector := textfile.NewCollector(appSettings)
 		prometheus.MustRegister(textFileCollector)
 
-		http.HandleFunc("/", auth.BasicAuthMiddleware(rootHtmlHandler, appSettings.BasicAuthProvider))
-		http.HandleFunc(metricsPath, auth.BasicAuthMiddleware(
+		http.HandleFunc("/", server.BasicAuthMiddleware(rootHtmlHandler, appSettings.BasicAuthProvider))
+		http.HandleFunc(metricsPath, server.BasicAuthMiddleware(
 			func(w http.ResponseWriter, r *http.Request) {
 				metricHandler(w, r, textFileCollector)
 			},
