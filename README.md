@@ -114,23 +114,29 @@ There are no configuration files.
 
 **CLI flags**
 ```
-usage: exporter [<flags>]
+🚀 Collect prometheus metrics from a running Fail2Ban instance
 
 Flags:
-  -h, --help     Show context-sensitive help (also try --help-long and --help-man).
-  -v, --version  show version info and exit
-      --collector.f2b.socket="/var/run/fail2ban/fail2ban.sock"  
-                 path to the fail2ban server socket
-      --collector.textfile.directory=""  
-                 directory to read text files with metrics from
-      --web.listen-address=":9191"  
-                 address to use for the metrics server
-      --web.basic-auth.username=""  
-                 username to use to protect endpoints with basic auth
-      --web.basic-auth.password=""  
-                 password to use to protect endpoints with basic auth
-      --collector.f2b.exit-on-socket-connection-error  
-                 when set to true the exporter will immediately exit on a fail2ban socket connection error
+  -h, --help                          Show context-sensitive help.
+  -v, --version                       Show version info and exit
+      --web.listen-address=":9191"    Address to use for the metrics server
+                                      ($F2B_WEB_LISTEN_ADDRESS)
+      --collector.f2b.socket="/var/run/fail2ban/fail2ban.sock"
+                                      Path to the fail2ban server socket
+                                      ($F2B_COLLECTOR_SOCKET)
+      --collector.f2b.exit-on-socket-connection-error
+                                      When set to true the exporter will immediately
+                                      exit on a fail2ban socket connection error
+                                      ($F2B_EXIT_ON_SOCKET_CONN_ERROR)
+      --collector.textfile.directory=STRING
+                                      Directory to read text files with metrics from
+                                      ($F2B_COLLECTOR_TEXT_PATH)
+      --web.basic-auth.username=STRING
+                                      Username to use to protect endpoints with basic auth
+                                      ($F2B_WEB_BASICAUTH_USER)
+      --web.basic-auth.password=STRING
+                                      Password to use to protect endpoints with basic auth
+                                      ($F2B_WEB_BASICAUTH_PASS)
 ```
 
 **Environment variables**
