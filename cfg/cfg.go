@@ -2,108 +2,68 @@ package cfg
 
 import (
 	"fmt"
-	"github.com/alecthomas/kingpin/v2"
 	"os"
+
+	"github.com/alecthomas/kong"
 )
 
-const (
-	socketEnvName                = "F2B_COLLECTOR_SOCKET"
-	fileCollectorPathEnvName     = "F2B_COLLECTOR_TEXT_PATH"
-	addressEnvName               = "F2B_WEB_LISTEN_ADDRESS"
-	basicAuthUserEnvName         = "F2B_WEB_BASICAUTH_USER"
-	basicAuthPassEnvName         = "F2B_WEB_BASICAUTH_PASS"
-	exitOnSocketConnErrorEnvName = "F2B_EXIT_ON_SOCKET_CONN_ERROR"
-)
-
-type AppSettings struct {
-	VersionMode           bool
-	MetricsAddress        string
-	Fail2BanSocketPath    string
-	FileCollectorPath     string
-	BasicAuthProvider     *hashedBasicAuth
-	ExitOnSocketConnError bool
-}
-
-func init() {
-	kingpin.HelpFlag.Short('h')
+var cliStruct struct {
+	VersionMode          bool   `name:"version" short:"v" help:"Show version info and exit"`
+	ServerAddress        string `name:"web.listen-address" env:"F2B_WEB_LISTEN_ADDRESS" help:"Address to use for the metrics server" default:"${default_address}"`
+	F2bSocketPath        string `name:"collector.f2b.socket" env:"F2B_COLLECTOR_SOCKET" help:"Path to the fail2ban server socket" default:"${default_socket}"`
+	ExitOnSocketError    bool   `name:"collector.f2b.exit-on-socket-connection-error" env:"F2B_EXIT_ON_SOCKET_CONN_ERROR" help:"When set to true the exporter will immediately exit on a fail2ban socket connection error"`
+	TextFileExporterPath string `name:"collector.textfile.directory" env:"F2B_COLLECTOR_TEXT_PATH" help:"Directory to read text files with metrics from"`
+	BasicAuthUser        string `name:"web.basic-auth.username" env:"F2B_WEB_BASICAUTH_USER" help:"Username to use to protect endpoints with basic auth"`
+	BasicAuthPass        string `name:"web.basic-auth.password" env:"F2B_WEB_BASICAUTH_PASS" help:"Password to use to protect endpoints with basic auth"`
 }
 
 func Parse() *AppSettings {
-	settings := &AppSettings{}
-	readParamsFromCli(settings)
-	settings.validateFlags()
+	ctx := kong.Parse(
+		&cliStruct,
+		kong.Vars{
+			"default_socket":  "/var/run/fail2ban/fail2ban.sock",
+			"default_address": ":9191",
+		},
+		kong.Name("fail2ban_exporter"),
+		kong.Description("🚀 Export prometheus metrics from a running Fail2Ban instance"),
+		kong.UsageOnError(),
+	)
+
+	validateFlags(ctx)
+	settings := &AppSettings{
+		VersionMode:           cliStruct.VersionMode,
+		MetricsAddress:        cliStruct.ServerAddress,
+		Fail2BanSocketPath:    cliStruct.F2bSocketPath,
+		FileCollectorPath:     cliStruct.TextFileExporterPath,
+		ExitOnSocketConnError: cliStruct.ExitOnSocketError,
+		BasicAuthProvider:     newHashedBasicAuth(cliStruct.BasicAuthUser, cliStruct.BasicAuthPass),
+	}
 	return settings
 }
 
-func readParamsFromCli(settings *AppSettings) {
-	versionMode := kingpin.
-		Flag("version", "show version info and exit").
-		Short('v').
-		Default("false").
-		Bool()
-	socketPath := kingpin.
-		Flag("collector.f2b.socket", "path to the fail2ban server socket").
-		Default("/var/run/fail2ban/fail2ban.sock").
-		Envar(socketEnvName).
-		String()
-	fileCollectorPath := kingpin.
-		Flag("collector.textfile.directory", "directory to read text files with metrics from").
-		Default("").
-		Envar(fileCollectorPathEnvName).
-		String()
-	address := kingpin.
-		Flag("web.listen-address", "address to use for the metrics server").
-		Default(":9191").
-		Envar(addressEnvName).
-		String()
-	rawBasicAuthUsername := kingpin.
-		Flag("web.basic-auth.username", "username to use to protect endpoints with basic auth").
-		Default("").
-		Envar(basicAuthUserEnvName).
-		String()
-	rawBasicAuthPassword := kingpin.
-		Flag("web.basic-auth.password", "password to use to protect endpoints with basic auth").
-		Default("").
-		Envar(basicAuthPassEnvName).
-		String()
-	rawExitOnSocketConnError := kingpin.
-		Flag("collector.f2b.exit-on-socket-connection-error", "when set to true the exporter will immediately exit on a fail2ban socket connection error").
-		Default("false").
-		Envar(exitOnSocketConnErrorEnvName).
-		Bool()
-
-	kingpin.Parse()
-
-	settings.VersionMode = *versionMode
-	settings.MetricsAddress = *address
-	settings.Fail2BanSocketPath = *socketPath
-	settings.FileCollectorPath = *fileCollectorPath
-	settings.setBasicAuthValues(*rawBasicAuthUsername, *rawBasicAuthPassword)
-	settings.ExitOnSocketConnError = *rawExitOnSocketConnError
-}
-
-func (settings *AppSettings) setBasicAuthValues(rawUsername, rawPassword string) {
-	settings.BasicAuthProvider = newHashedBasicAuth(rawUsername, rawPassword)
-}
-
-func (settings *AppSettings) validateFlags() {
+func validateFlags(cliCtx *kong.Context) {
 	var flagsValid = true
-	if !settings.VersionMode {
-		if settings.Fail2BanSocketPath == "" {
-			fmt.Println("error: fail2ban socket path must not be blank")
+	var messages = []string{}
+	if !cliStruct.VersionMode {
+		if cliStruct.F2bSocketPath == "" {
+			messages = append(messages, "error: fail2ban socket path must not be blank")
 			flagsValid = false
 		}
-		if settings.MetricsAddress == "" {
-			fmt.Println("error: invalid server address, must not be blank")
+		if cliStruct.ServerAddress == "" {
+			messages = append(messages, "error: invalid server address, must not be blank")
 			flagsValid = false
 		}
-		if (len(settings.BasicAuthProvider.username) > 0) != (len(settings.BasicAuthProvider.password) > 0) {
-			fmt.Println("error: to enable basic auth both the username and the password must be provided")
+		if (len(cliStruct.BasicAuthUser) > 0) != (len(cliStruct.BasicAuthPass) > 0) {
+			messages = append(messages, "error: to enable basic auth both the username and the password must be provided")
 			flagsValid = false
 		}
 	}
 	if !flagsValid {
-		kingpin.Usage()
+		cliCtx.PrintUsage(false)
+		fmt.Println()
+		for i := 0; i < len(messages); i++ {
+			fmt.Println(messages[i])
+		}
 		os.Exit(1)
 	}
 }
