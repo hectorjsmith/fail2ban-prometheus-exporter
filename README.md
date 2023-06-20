@@ -22,7 +22,7 @@ The following command will start collecting metrics from the `/var/run/fail2ban/
 ```
 $ fail2ban_exporter --collector.f2b.socket=/var/run/fail2ban/fail2ban.sock --web.listen-address=":9191"
 
-2022/02/20 09:54:06 fail2ban exporter version 0.5.0
+2022/02/20 09:54:06 fail2ban exporter version 0.8.1
 2022/02/20 09:54:06 starting server at :9191
 2022/02/20 09:54:06 reading metrics from fail2ban socket: /var/run/fail2ban/fail2ban.sock
 2022/02/20 09:54:06 metrics available at '/metrics'
@@ -55,7 +55,7 @@ services:
     - "9191:9191"
 ```
 
-Use the `:latest` tag to get the latest stable release. Or use the `:nightly` tag for the latest (unstable) version.
+Use the `:latest` tag to get the latest stable release.
 See the [registry page](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/container_registry) for all available tags.
 
 **NOTE:** While it is possible to mount the `fail2ban.sock` file directly, it is recommended to mount the parent folder instead.
@@ -149,12 +149,13 @@ If both are specified, the CLI flag takes precedence.
 
 ## 4. Building from source
 
-The simplest way to build the project is to run the `build/snapshot` make command.
-This will use `goreleaser` to build out binaries and archives for the project.
-Binaries are stored in the `dist/` folder.
+Building from source has the following dependencies:
+- Go v1.20
+- Make
 
-Alternatively, `go mod download` and `go build` can be used from the `src/` folder to build out the project.
-This will download dependencies and build the project.
+From there, simply run `make build`
+
+This will download the necessary dependencies and build a `fail2ban_exporter` binary in the root of the project.
 
 ## 5. Textfile metrics
 
