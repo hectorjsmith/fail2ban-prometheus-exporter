@@ -1,10 +1,12 @@
 package cfg
 
+import "gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/auth"
+
 type AppSettings struct {
 	VersionMode           bool
 	MetricsAddress        string
 	Fail2BanSocketPath    string
 	FileCollectorPath     string
-	BasicAuthProvider     *hashedBasicAuth
+	AuthProvider          auth.AuthProvider
 	ExitOnSocketConnError bool
 }

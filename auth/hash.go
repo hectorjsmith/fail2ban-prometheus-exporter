@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 )
 
-func Hash(data []byte) []byte {
+func hash(data []byte) []byte {
 	if len(data) == 0 {
 		return []byte{}
 	}
@@ -14,5 +14,5 @@ func Hash(data []byte) []byte {
 }
 
 func HashString(data string) string {
-	return hex.EncodeToString(Hash([]byte(data)))
+	return hex.EncodeToString(hash([]byte(data)))
 }
