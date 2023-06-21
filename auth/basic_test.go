@@ -9,7 +9,7 @@ import (
 func Test_GIVEN_BasicAuthSet_WHEN_CallingIsAllowedWithCorrectCreds_THEN_TrueReturned(t *testing.T) {
 	// assemble
 	username := "u1"
-	password := "p1"
+	password := HashString("abc")
 	request := httptest.NewRequest(http.MethodGet, "http://example.com", nil)
 	request.SetBasicAuth(username, password)
 	provider := NewBasicAuthProvider(username, password)
