@@ -3,21 +3,15 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/cfg"
 	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/collector/f2b"
 	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/collector/textfile"
 	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/server"
-)
-
-const (
-	metricsPath = "/metrics"
 )
 
 var (
@@ -30,26 +24,6 @@ var (
 func printAppVersion() {
 	fmt.Println(version)
 	fmt.Printf("    build date:  %s\r\n    commit hash: %s\r\n    built by:    %s\r\n", date, commit, builtBy)
-}
-
-func rootHtmlHandler(w http.ResponseWriter, r *http.Request) {
-	_, err := w.Write([]byte(
-		`<html>
-			<head><title>Fail2Ban Exporter</title></head>
-			<body>
-			<h1>Fail2Ban Exporter</h1>
-			<p><a href="` + metricsPath + `">Metrics</a></p>
-			</body>
-		</html>`))
-	if err != nil {
-		log.Printf("error handling root url: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-}
-
-func metricHandler(w http.ResponseWriter, r *http.Request, collector *textfile.Collector) {
-	promhttp.Handler().ServeHTTP(w, r)
-	collector.WriteTextFileMetrics(w, r)
 }
 
 func main() {
@@ -67,21 +41,7 @@ func main() {
 		textFileCollector := textfile.NewCollector(appSettings)
 		prometheus.MustRegister(textFileCollector)
 
-		http.HandleFunc("/", server.BasicAuthMiddleware(rootHtmlHandler, appSettings.AuthProvider))
-		http.HandleFunc(metricsPath, server.BasicAuthMiddleware(
-			func(w http.ResponseWriter, r *http.Request) {
-				metricHandler(w, r, textFileCollector)
-			},
-			appSettings.AuthProvider,
-		))
-		log.Printf("metrics available at '%s'", metricsPath)
-
-		svrErr := make(chan error)
-		go func() {
-			svrErr <- http.ListenAndServe(appSettings.MetricsAddress, nil)
-		}()
-		log.Print("ready")
-
+		svrErr := server.StartServer(appSettings, textFileCollector)
 		err := <-svrErr
 		log.Fatal(err)
 	}
