@@ -3,6 +3,7 @@ package server
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/cfg"
 	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/collector/textfile"
@@ -26,7 +27,14 @@ func StartServer(
 
 	svrErr := make(chan error)
 	go func() {
-		svrErr <- http.ListenAndServe(appSettings.MetricsAddress, nil)
+		httpServer := &http.Server{
+			Addr:              appSettings.MetricsAddress,
+			ReadHeaderTimeout: 10 * time.Second,
+			ReadTimeout:       10 * time.Second,
+			WriteTimeout:      10 * time.Second,
+			IdleTimeout:       30 * time.Second,
+		}
+		svrErr <- httpServer.ListenAndServe()
 	}()
 	log.Print("ready")
 	return svrErr
