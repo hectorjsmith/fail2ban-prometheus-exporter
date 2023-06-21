@@ -18,13 +18,13 @@ func newTestRequest() *http.Request {
 	return httptest.NewRequest(http.MethodGet, "http://example.com", nil)
 }
 
-func executeBasicAuthMiddlewareTest(t *testing.T, authMatches bool, expectedCode int, expectedCallCount int) {
+func executeAuthMiddlewareTest(t *testing.T, authMatches bool, expectedCode int, expectedCallCount int) {
 	callCount := 0
 	testHandler := func(w http.ResponseWriter, r *http.Request) {
 		callCount++
 	}
 
-	handler := BasicAuthMiddleware(testHandler, testAuthProvider{match: authMatches})
+	handler := AuthMiddleware(testHandler, testAuthProvider{match: authMatches})
 	recorder := httptest.NewRecorder()
 	request := newTestRequest()
 	handler.ServeHTTP(recorder, request)
@@ -38,9 +38,9 @@ func executeBasicAuthMiddlewareTest(t *testing.T, authMatches bool, expectedCode
 }
 
 func Test_GIVEN_MatchingBasicAuth_WHEN_MethodCalled_THEN_RequestProcessed(t *testing.T) {
-	executeBasicAuthMiddlewareTest(t, true, http.StatusOK, 1)
+	executeAuthMiddlewareTest(t, true, http.StatusOK, 1)
 }
 
 func Test_GIVEN_NonMatchingBasicAuth_WHEN_MethodCalled_THEN_RequestRejected(t *testing.T) {
-	executeBasicAuthMiddlewareTest(t, false, http.StatusUnauthorized, 0)
+	executeAuthMiddlewareTest(t, false, http.StatusUnauthorized, 0)
 }

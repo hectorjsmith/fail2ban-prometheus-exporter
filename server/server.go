@@ -12,11 +12,11 @@ func StartServer(
 	appSettings *cfg.AppSettings,
 	textFileCollector *textfile.Collector,
 ) chan error {
-	http.HandleFunc("/", BasicAuthMiddleware(
+	http.HandleFunc("/", AuthMiddleware(
 		rootHtmlHandler,
 		appSettings.AuthProvider,
 	))
-	http.HandleFunc(metricsPath, BasicAuthMiddleware(
+	http.HandleFunc(metricsPath, AuthMiddleware(
 		func(w http.ResponseWriter, r *http.Request) {
 			metricHandler(w, r, textFileCollector)
 		},
