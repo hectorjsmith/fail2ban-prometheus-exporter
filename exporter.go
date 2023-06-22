@@ -53,7 +53,7 @@ func main() {
 }
 
 func handleGracefulShutdown() {
-	var signals = make(chan os.Signal)
+	var signals = make(chan os.Signal, 1)
 
 	signal.Notify(signals, syscall.SIGTERM)
 	signal.Notify(signals, syscall.SIGINT)

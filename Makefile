@@ -20,6 +20,11 @@ update:
 test: download
 	go test ./... -v -race
 
+# Look for "suspicious constructs" in source code
+.PHONY: vet
+vet: download
+	go vet ./...
+
 # Format code
 .PHONY: fmt
 fmt: download
