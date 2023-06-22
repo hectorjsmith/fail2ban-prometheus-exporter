@@ -122,6 +122,8 @@ There are no configuration files.
 Flags:
   -h, --help                          Show context-sensitive help.
   -v, --version                       Show version info and exit
+      --dry-run                       Attempt to connect to the fail2ban socket then exit
+                                      before starting the server
       --web.listen-address=":9191"    Address to use for the metrics server
                                       ($F2B_WEB_LISTEN_ADDRESS)
       --collector.f2b.socket="/var/run/fail2ban/fail2ban.sock"
