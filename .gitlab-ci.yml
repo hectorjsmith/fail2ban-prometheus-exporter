@@ -19,6 +19,12 @@ format:
   script:
     - make check/fmt
 
+vet:
+  extends: .go_template
+  stage: test
+  script:
+    - make vet
+
 test:
   extends: .go_template
   stage: test
