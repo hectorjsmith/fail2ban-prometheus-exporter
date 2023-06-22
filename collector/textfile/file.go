@@ -1,11 +1,12 @@
 package textfile
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
-	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 const namespace = "textfile"
@@ -19,7 +20,7 @@ var (
 )
 
 func (c *Collector) collectFileContents() {
-	files, err := ioutil.ReadDir(c.folderPath)
+	files, err := os.ReadDir(c.folderPath)
 	if err != nil {
 		log.Printf("error reading directory '%s': %v", c.folderPath, err)
 		return
@@ -36,7 +37,7 @@ func (c *Collector) collectFileContents() {
 		}
 
 		fullPath := filepath.Join(c.folderPath, fileName)
-		content, err := ioutil.ReadFile(fullPath)
+		content, err := os.ReadFile(fullPath)
 		if err != nil {
 			c.appendErrorForPath(fileName)
 			log.Printf("error reading contents of file '%s': %v", fileName, err)
