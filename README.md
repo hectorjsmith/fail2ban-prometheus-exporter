@@ -31,6 +31,9 @@ $ fail2ban_exporter --collector.f2b.socket=/var/run/fail2ban/fail2ban.sock --web
 
 Binary files for each release can be found on the [releases](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/-/releases) page.
 
+There is also an [example systemd service file](/_examples/systemd/fail2ban_exporter.service) included in the repository.
+This is a starting point to run the exporter as a service.
+
 ### 1.2. Docker
 
 **Docker run**
@@ -100,7 +103,7 @@ Status for the jail: sshd
 ### 2.1. Grafana
 
 The metrics exported by this tool are compatible with Prometheus and Grafana.
-A sample grafana dashboard can be found in the [grafana.json](/examples/grafana/dashboard.json) file.
+A sample grafana dashboard can be found in the [grafana.json](/_examples/grafana/dashboard.json) file.
 Just import the contents of this file into a new Grafana dashboard to get started.
 
 The dashboard supports displaying data from multiple exporters. Use the `instance` dashboard variable to select which ones to display.
