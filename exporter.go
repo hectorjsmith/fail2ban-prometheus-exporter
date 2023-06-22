@@ -30,20 +30,25 @@ func main() {
 	appSettings := cfg.Parse()
 	if appSettings.VersionMode {
 		printAppVersion()
-	} else {
-		handleGracefulShutdown()
-		log.Printf("fail2ban exporter version %s", version)
-		log.Printf("starting server at %s", appSettings.MetricsAddress)
+		return
+	}
 
-		f2bCollector := f2b.NewExporter(appSettings, version)
-		prometheus.MustRegister(f2bCollector)
+	handleGracefulShutdown()
+	log.Printf("fail2ban exporter version %s", version)
+	log.Printf("starting server at %s", appSettings.MetricsAddress)
 
-		textFileCollector := textfile.NewCollector(appSettings)
-		prometheus.MustRegister(textFileCollector)
+	f2bCollector := f2b.NewExporter(appSettings, version)
+	prometheus.MustRegister(f2bCollector)
 
+	textFileCollector := textfile.NewCollector(appSettings)
+	prometheus.MustRegister(textFileCollector)
+
+	if !appSettings.DryRunMode {
 		svrErr := server.StartServer(appSettings, textFileCollector)
 		err := <-svrErr
 		log.Fatal(err)
+	} else {
+		log.Print("running in dry-run mode - exiting")
 	}
 }
 

@@ -11,6 +11,7 @@ import (
 
 var cliStruct struct {
 	VersionMode          bool   `name:"version" short:"v" help:"Show version info and exit"`
+	DryRunMode           bool   `name:"dry-run" help:"Attempt to connect to the fail2ban socket then exit before starting the server"`
 	ServerAddress        string `name:"web.listen-address" env:"F2B_WEB_LISTEN_ADDRESS" help:"Address to use for the metrics server" default:"${default_address}"`
 	F2bSocketPath        string `name:"collector.f2b.socket" env:"F2B_COLLECTOR_SOCKET" help:"Path to the fail2ban server socket" default:"${default_socket}"`
 	ExitOnSocketError    bool   `name:"collector.f2b.exit-on-socket-connection-error" env:"F2B_EXIT_ON_SOCKET_CONN_ERROR" help:"When set to true the exporter will immediately exit on a fail2ban socket connection error"`
@@ -34,6 +35,7 @@ func Parse() *AppSettings {
 	validateFlags(ctx)
 	settings := &AppSettings{
 		VersionMode:           cliStruct.VersionMode,
+		DryRunMode:            cliStruct.DryRunMode,
 		MetricsAddress:        cliStruct.ServerAddress,
 		Fail2BanSocketPath:    cliStruct.F2bSocketPath,
 		FileCollectorPath:     cliStruct.TextFileExporterPath,
