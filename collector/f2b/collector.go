@@ -1,11 +1,12 @@
 package f2b
 
 import (
+	"log"
+	"os"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/cfg"
 	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/socket"
-	"log"
-	"os"
 )
 
 type Collector struct {
@@ -18,7 +19,18 @@ type Collector struct {
 }
 
 func NewExporter(appSettings *cfg.AppSettings, exporterVersion string) *Collector {
-	log.Printf("reading metrics from fail2ban socket: %s", appSettings.Fail2BanSocketPath)
+	log.Printf("reading fail2ban metrics socket file: %s", appSettings.Fail2BanSocketPath)
+	s, err := socket.ConnectToSocket(appSettings.Fail2BanSocketPath)
+	if err != nil {
+		log.Printf("error connecting to socket: %v", err)
+	} else {
+		version, err := s.GetServerVersion()
+		if err != nil {
+			log.Printf("error interacting with socket: %v", err)
+		} else {
+			log.Printf("successfully connected to fail2ban socket! fail2ban version: %s", version)
+		}
+	}
 	return &Collector{
 		socketPath:                 appSettings.Fail2BanSocketPath,
 		exporterVersion:            exporterVersion,
