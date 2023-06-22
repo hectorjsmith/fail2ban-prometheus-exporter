@@ -19,7 +19,7 @@ type Collector struct {
 }
 
 func NewExporter(appSettings *cfg.AppSettings, exporterVersion string) *Collector {
-	log.Printf("reading fail2ban metrics socket file: %s", appSettings.Fail2BanSocketPath)
+	log.Printf("reading fail2ban metrics from socket file: %s", appSettings.Fail2BanSocketPath)
 	printFail2BanServerVersion(appSettings.Fail2BanSocketPath)
 	return &Collector{
 		socketPath:                 appSettings.Fail2BanSocketPath,
