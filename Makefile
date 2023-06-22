@@ -34,7 +34,7 @@ check/fmt: download
 # Build project
 .PHONY: build
 build:
-	go build \
+	CGO_ENABLED=0 go build \
 	-ldflags "\
 	-X main.version=${shell git describe --tags} \
 	-X main.commit=${shell git rev-parse HEAD} \
