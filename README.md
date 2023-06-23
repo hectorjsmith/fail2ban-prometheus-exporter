@@ -1,6 +1,7 @@
 # Fail2Ban Prometheus Exporter
 
 [![Pipeline](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/badges/main/pipeline.svg)](https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter)
+[![Go Report Card](https://goreportcard.com/badge/gitlab.com/hectorjsmith/fail2ban-prometheus-exporter)](https://goreportcard.com/report/gitlab.com/hectorjsmith/fail2ban-prometheus-exporter)
 
 Collect metrics from a running fail2ban instance.
 
