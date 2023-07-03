@@ -43,3 +43,4 @@ changelog:
   filters:
     exclude:
       - "^Merge"
+      - "^merge"
