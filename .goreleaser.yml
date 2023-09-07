@@ -15,9 +15,15 @@ builds:
       - "7"
 
 dockers:
-- image_templates: ["registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:{{ .Version }}"]
-  dockerfile: Dockerfile
+- image_templates:
+  - "registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:{{ .Major }}-amd64"
+  - "registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:{{ .Major }}.{{ .Minor }}-amd64"
+  - 'registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:{{ .Version }}-amd64'
+  - "registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest-amd64"
+  use: buildx
   build_flag_templates:
+  - "--pull"
+  - "--platform=linux/amd64"
   - --label=org.opencontainers.image.title={{ .ProjectName }}
   - --label=org.opencontainers.image.description={{ .ProjectName }}
   - --label=org.opencontainers.image.url=https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter
@@ -26,6 +32,45 @@ dockers:
   - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
   - --label=org.opencontainers.image.revision={{ .FullCommit }}
   - --label=org.opencontainers.image.licenses=MIT
+- image_templates:
+  - "registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:{{ .Major }}-arm64"
+  - "registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:{{ .Major }}.{{ .Minor }}-arm64"
+  - 'registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:{{ .Version }}-arm64'
+  - "registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest-arm64"
+  use: buildx
+  build_flag_templates:
+  - "--pull"
+  - "--platform=linux/arm64"
+  - --label=org.opencontainers.image.title={{ .ProjectName }}
+  - --label=org.opencontainers.image.description={{ .ProjectName }}
+  - --label=org.opencontainers.image.url=https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter
+  - --label=org.opencontainers.image.source=https://gitlab.com/hectorjsmith/fail2ban-prometheus-exporter
+  - --label=org.opencontainers.image.version={{ .Version }}
+  - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
+  - --label=org.opencontainers.image.revision={{ .FullCommit }}
+  - --label=org.opencontainers.image.licenses=MIT
+  goarch: arm64
+
+docker_manifests:
+- name_template: 'registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:{{ .Major }}'
+  image_templates:
+  - 'registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:{{ .Major }}-amd64'
+  - 'registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:{{ .Major }}-arm64'
+
+- name_template: 'registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:{{ .Major }}.{{ .Minor }}'
+  image_templates:
+  - 'registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:{{ .Major }}.{{ .Minor }}-amd64'
+  - 'registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:{{ .Major }}.{{ .Minor }}-arm64'
+
+- name_template: 'registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:{{ .Version }}'
+  image_templates:
+  - 'registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:{{ .Version }}-amd64'
+  - 'registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:{{ .Version }}-arm64'
+
+- name_template: 'registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest'
+  image_templates:
+  - 'registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest-amd64'
+  - 'registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest-arm64'
 
 changelog:
   groups:
