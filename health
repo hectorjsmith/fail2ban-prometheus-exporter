@@ -1,0 +1,8 @@
+#!/bin/sh
+
+port=9191
+if [ ! -z $F2B_WEB_LISTEN_ADDRESS ]; then
+    port=`echo $F2B_WEB_LISTEN_ADDRESS | cut -d ":" -f 2 -`
+fi
+
+curl --fail localhost:$port/metrics || exit 1
