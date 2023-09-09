@@ -11,6 +11,7 @@ Collect metrics from a running fail2ban instance.
 3. Configuration
 4. Building from source
 5. Textfile metrics
+6. Troubleshooting
 
 ## 1. Quick Start
 
@@ -204,3 +205,35 @@ docker run -d \
     -p "9191:9191" \
     registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest
 ```
+
+## 6. Troubleshooting
+
+### 6.1. "no such file or directory"
+
+```
+error opening socket: dial unix /var/run/fail2ban/fail2ban.sock: connect: no such file or directory
+```
+
+There are a couple of potential causes for the error above.
+
+**File not found**
+
+The first is that the file does not exist, so first check that the file path shown in the error actually exists on the system running the exporter.
+The fail2ban server may be storing the socket file in another location on your machine.
+
+If you are using docker, make sure the correct host folder was mounted to the correct location.
+
+If the file is not in the expected location, you can run the exporter with the corresponding CLI flag or environment variable to change the location of the socket file.
+
+**Permissions**
+
+If the file does exist, the likely cause is file permissions.
+By default, the fail2ban server runs as the `root` user and the socket file can only be accessed by the same user.
+If you are running the exporter as a non-root user, it will not be able to open the socket file to read/write commands to the server, leading to the error above.
+
+In this case there are a few solutions:
+1. Run the exporter as the same user as fail2ban (usually `root`)
+2. Update the fail2ban server config to run as a non-root user, then run the exporter as the same user
+3. Update the socket file permissions to be less restrictive
+
+I would recommend option `1.` since it is the simplest. Option `2.` is a bit more complex, check the [fail2ban server documentation](https://coderwall.com/p/haj28a/running-rootless-fail2ban-on-debian) for more details. And option `3.` is just a temporary fix. The socket file gets re-created each time the fail2ban server is restarted and the original permissions will be restored, so you will need to update the permissions every time the server restarts.
