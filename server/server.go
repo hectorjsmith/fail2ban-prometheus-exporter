@@ -6,11 +6,13 @@ import (
 	"time"
 
 	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/cfg"
+	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/collector/f2b"
 	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/collector/textfile"
 )
 
 func StartServer(
 	appSettings *cfg.AppSettings,
+	f2bCollector *f2b.Collector,
 	textFileCollector *textfile.Collector,
 ) chan error {
 	http.HandleFunc("/", AuthMiddleware(
@@ -23,6 +25,11 @@ func StartServer(
 		},
 		appSettings.AuthProvider,
 	))
+	http.HandleFunc("/health",
+		func(w http.ResponseWriter, r *http.Request) {
+			healthHandler(w, r, f2bCollector)
+		},
+	)
 	log.Printf("metrics available at '%s'", metricsPath)
 
 	svrErr := make(chan error)
