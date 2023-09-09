@@ -64,10 +64,14 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 func (c *Collector) IsHealthy() bool {
 	s, err := socket.ConnectToSocket(c.socketPath)
 	if err != nil {
+		log.Printf("error opening socket: %v", err)
+		c.socketConnectionErrorCount++
 		return false
 	}
 	pingSuccess, err := s.Ping()
 	if err != nil {
+		log.Printf("error pinging fail2ban server: %v", err)
+		c.socketRequestErrorCount++
 		return false
 	}
 	return pingSuccess
