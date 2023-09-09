@@ -223,11 +223,11 @@ The fail2ban server may be storing the socket file in another location on your m
 
 If you are using docker, make sure the correct host folder was mounted to the correct location.
 
-If the file is not in the expected location, you can run the exporter with the corresponding CLI flag or environment variable to change the location of the socket file.
+If the file is not in the expected location, you can run the exporter with the corresponding CLI flag or environment variable to use a different file path.
 
 **Permissions**
 
-If the file does exist, the likely cause is file permissions.
+If the file does exist, the likely cause are file permissions.
 By default, the fail2ban server runs as the `root` user and the socket file can only be accessed by the same user.
 If you are running the exporter as a non-root user, it will not be able to open the socket file to read/write commands to the server, leading to the error above.
 
