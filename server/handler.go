@@ -35,10 +35,10 @@ func metricHandler(w http.ResponseWriter, r *http.Request, collector *textfile.C
 
 func healthHandler(w http.ResponseWriter, r *http.Request, collector *f2b.Collector) {
 	if collector.IsHealthy() {
-		println("healthy")
 		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("{\"healthy\":true}"))
 	} else {
-		println("unhealthy")
 		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("{\"healthy\":false}"))
 	}
 }
