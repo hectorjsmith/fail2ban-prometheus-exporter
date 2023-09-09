@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/collector/f2b"
 	"gitlab.com/hectorjsmith/fail2ban-prometheus-exporter/collector/textfile"
 )
 
@@ -30,4 +31,14 @@ func rootHtmlHandler(w http.ResponseWriter, r *http.Request) {
 func metricHandler(w http.ResponseWriter, r *http.Request, collector *textfile.Collector) {
 	promhttp.Handler().ServeHTTP(w, r)
 	collector.WriteTextFileMetrics(w, r)
+}
+
+func healthHandler(w http.ResponseWriter, r *http.Request, collector *f2b.Collector) {
+	if collector.IsHealthy() {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("{\"healthy\":true}"))
+	} else {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("{\"healthy\":false}"))
+	}
 }
