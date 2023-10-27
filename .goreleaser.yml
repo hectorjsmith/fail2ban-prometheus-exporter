@@ -23,6 +23,7 @@ dockers:
   extra_files:
   - health
   use: buildx
+  dockerfile: Dockerfile.goreleaser
   build_flag_templates:
   - "--pull"
   - "--platform=linux/amd64"
@@ -42,6 +43,7 @@ dockers:
   extra_files:
   - health
   use: buildx
+  dockerfile: Dockerfile.goreleaser
   build_flag_templates:
   - "--pull"
   - "--platform=linux/arm64"
