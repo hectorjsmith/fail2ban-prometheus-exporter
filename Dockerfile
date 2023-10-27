@@ -1,11 +1,26 @@
+FROM golang:1.20-buster AS build
+
+# Create build workspace folder
+WORKDIR /workspace
+ADD . /workspace
+
+# Install updates and build tools
+RUN apt update --yes && \
+    apt install --yes build-essential
+
+# Build the actual binary
+RUN make build
+
+# -- -- -- -- -- --
+
+# Set up image to run the tool
 FROM alpine
 
 # Create main app folder to run from
 WORKDIR /app
 
-# Copy compiled binary to release image
-# (must build the binary before running docker build)
-COPY fail2ban_exporter /app/fail2ban_exporter
+# Copy built binary from build image
+COPY --from=build /workspace/fail2ban_exporter /app
 
 # Setup a healthcheck
 COPY health /app/health
