@@ -51,5 +51,5 @@ build:
 
 # Build project docker container
 .PHONY: build/docker
-build/docker: build
+build/docker:
 	docker build -t fail2ban-prometheus-exporter .
