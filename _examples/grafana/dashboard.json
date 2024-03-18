@@ -801,7 +801,7 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "f2b_errors{instance=~\"$instance\"}",
+          "expr": "increase(f2b_errors{instance=~\"$instance\"}[$__rate_interval])",
           "interval": "",
           "legendFormat": "{{type}} ({{instance}})",
           "range": true,
